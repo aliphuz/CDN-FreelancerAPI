@@ -13,6 +13,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReact", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // Add FluentValidation
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateFreelancerValidator>();
@@ -22,7 +33,7 @@ builder.Services.AddScoped<FreelancerService>();
 
 // Add repository
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? "Server=localhost;Database=CDN_FreelancerDB;Trusted_Connection=true;TrustServerCertificate=true;";
+    ?? "Server=DESKTOP-K234GO4\\SQLEXPRESS;Database=CDN_FreelancerDB;Trusted_Connection=True;TrustServerCertificate=True;";
 builder.Services.AddScoped<IFreelancerRepository>(provider => new FreelancerRepository(connectionString));
 
 var app = builder.Build();
@@ -35,6 +46,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.UseCors("AllowReact");
 
 app.UseHttpsRedirection();
 

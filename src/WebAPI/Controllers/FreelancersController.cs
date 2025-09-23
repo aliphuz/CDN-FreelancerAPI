@@ -1,6 +1,8 @@
 using CDN.FreelancerAPI.Application.DTOs;
 using CDN.FreelancerAPI.Application.UseCases;
+using CDN.FreelancerAPI.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CDN.FreelancerAPI.WebAPI.Controllers;
 

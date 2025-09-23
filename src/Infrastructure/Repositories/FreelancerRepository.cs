@@ -18,6 +18,7 @@ public class FreelancerRepository : IFreelancerRepository
     public async Task<Freelancer> CreateAsync(Freelancer freelancer)
     {
         using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
         try
@@ -57,6 +58,7 @@ public class FreelancerRepository : IFreelancerRepository
     public async Task<Freelancer?> GetByIdAsync(int id)
     {
         using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
         
         var freelancer = await connection.QuerySingleOrDefaultAsync<Freelancer>(
             "SELECT * FROM Freelancers WHERE Id = @Id", new { Id = id });
@@ -75,6 +77,7 @@ public class FreelancerRepository : IFreelancerRepository
     public async Task<IEnumerable<Freelancer>> GetAllAsync(int page = 1, int pageSize = 10)
     {
         using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
         
         var offset = (page - 1) * pageSize;
         var freelancers = await connection.QueryAsync<Freelancer>(
@@ -96,6 +99,7 @@ public class FreelancerRepository : IFreelancerRepository
     public async Task<Freelancer> UpdateAsync(Freelancer freelancer)
     {
         using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
         try
@@ -137,6 +141,7 @@ public class FreelancerRepository : IFreelancerRepository
     public async Task DeleteAsync(int id)
     {
         using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
         try
@@ -157,6 +162,7 @@ public class FreelancerRepository : IFreelancerRepository
     public async Task<IEnumerable<Freelancer>> SearchAsync(string keyword)
     {
         using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
         
         var freelancers = await connection.QueryAsync<Freelancer>(
             "SELECT * FROM Freelancers WHERE Username LIKE @Keyword OR Email LIKE @Keyword",
@@ -177,6 +183,7 @@ public class FreelancerRepository : IFreelancerRepository
     public async Task ArchiveAsync(int id, bool archive)
     {
         using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
         await connection.ExecuteAsync(
             "UPDATE Freelancers SET IsArchived = @IsArchived WHERE Id = @Id",
             new { Id = id, IsArchived = archive });
