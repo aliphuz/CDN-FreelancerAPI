@@ -39,9 +39,9 @@ public class FreelancersController : ControllerBase
 
     // GET api/Freelancers/paged?page=1&pageSize=10
     [HttpGet("paged")]
-    public async Task<IActionResult> GetFreelancersPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetFreelancersPaged([FromQuery] int pageNumber, [FromQuery] int pageSize )
     {
-        var freelancers = await _freelancerService.GetFreelancersPagedAsync(page, pageSize);
+        var freelancers = await _freelancerService.GetFreelancersPagedAsync(pageNumber, pageSize);
         return Ok(freelancers);
     }
 

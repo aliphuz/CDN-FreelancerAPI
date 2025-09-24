@@ -9,4 +9,7 @@ public class Freelancer
     public bool IsArchived { get; set; }
     public List<Skillset> Skillsets { get; set; } = new();
     public List<Hobby> Hobbies { get; set; } = new();
+    public int PageNumber { get; set; } = 1;
+
+    public int PageSize { get; set; } = 10; 
 }
