@@ -63,7 +63,7 @@ This project follows Clean Architecture principles with the following layers:
 
 - `POST /api/freelancers` - Create a new freelancer
 - `GET /api/freelancers/{id}` - Get freelancer by ID
-- `GET /api/freelancers` - Get all freelancers (with pagination)
+- `GET /api/freelancers/paged` - Get all freelancers (with pagination)
 - `GET /api/freelancers/search?keyword=...` - Search freelancers
 - `PUT /api/freelancers/{id}` - Update freelancer
 - `DELETE /api/freelancers/{id}` - Delete freelancer
