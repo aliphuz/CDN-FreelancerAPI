@@ -96,6 +96,23 @@ public class FreelancerRepository : IFreelancerRepository
         return freelancers;
     }
 
+    public async Task<IEnumerable<Freelancer>> GetAllAsync()
+    {
+        using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+        
+        var freelancers = await connection.QueryAsync<Freelancer>(
+            "SELECT * FROM Freelancers");
+        foreach (var freelancer in freelancers)
+        {
+            freelancer.Skillsets = (await connection.QueryAsync<Skillset>(
+                "SELECT * FROM Skillsets WHERE FreelancerId = @Id", new { Id = freelancer.Id })).ToList();
+            freelancer.Hobbies = (await connection.QueryAsync<Hobby>(
+                "SELECT * FROM Hobbies WHERE FreelancerId = @Id", new { Id = freelancer.Id })).ToList();
+        }
+        return freelancers;
+    }
+
     public async Task<Freelancer> UpdateAsync(Freelancer freelancer)
     {
         using var connection = new SqlConnection(_connectionString);

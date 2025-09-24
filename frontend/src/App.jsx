@@ -8,13 +8,20 @@ function App() {
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const [currentView, setCurrentView] = useState('list');
+  const [editingFreelancer, setEditingFreelancer] = useState(null);
+
   useEffect(() => {
     loadFreelancers();
-  }, []);
+  }, [page]);
 
   const loadFreelancers = async () => {
+    setLoading(true);
     try {
-      const response = await freelancerApi.getAll();
+      const response = await freelancerApi.getAll(page, pageSize);
       setFreelancers(response.data);
     } catch (error) {
       console.error('Error loading freelancers:', error);
@@ -22,9 +29,6 @@ function App() {
       setLoading(false);
     }
   };
-  
-  const [currentView, setCurrentView] = useState('list');
-  const [editingFreelancer, setEditingFreelancer] = useState(null);
 
   const handleAddNew = () => {
     setEditingFreelancer(null);
@@ -72,16 +76,42 @@ function App() {
       {currentView === 'list' && (
         <>
           <button onClick={handleAddNew} className={styles.addButton}>
-            Add New Freelancer
+            ➕ Add New Freelancer
           </button>
+
           {loading ? (
-            <div style={{ textAlign: 'center', color: '#ff6b35', fontSize: '18px' }}>Loading...</div>
+            <div style={{ textAlign: 'center', color: '#ff6b35', fontSize: '18px' }}>
+              Loading...
+            </div>
           ) : (
-            <FreelancerTable 
-              freelancers={freelancers}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <>
+              <FreelancerTable 
+                freelancers={freelancers}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+
+              {/* Pagination Controls */}
+              <div className={styles.pagination}>
+                <button 
+                  onClick={() => setPage((p) => Math.max(p - 1, 1))} 
+                  disabled={page === 1}
+                  className={styles.pageButton}
+                >
+                  ⬅ Previous
+                </button>
+
+                <span className={styles.pageInfo}>Page {page}</span>
+
+                <button 
+                  onClick={() => setPage((p) => p + 1)} 
+                  disabled={freelancers.length < pageSize}
+                  className={styles.pageButton}
+                >
+                  Next ➡
+                </button>
+              </div>
+            </>
           )}
         </>
       )}

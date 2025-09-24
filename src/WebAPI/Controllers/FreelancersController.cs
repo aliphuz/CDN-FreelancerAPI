@@ -1,8 +1,6 @@
 using CDN.FreelancerAPI.Application.DTOs;
 using CDN.FreelancerAPI.Application.UseCases;
-using CDN.FreelancerAPI.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace CDN.FreelancerAPI.WebAPI.Controllers;
 
@@ -21,20 +19,29 @@ public class FreelancersController : ControllerBase
     public async Task<IActionResult> CreateFreelancer([FromBody] CreateFreelancerDto dto)
     {
         var freelancer = await _freelancerService.CreateFreelancerAsync(dto);
-        return CreatedAtAction(nameof(GetFreelancer), new { id = freelancer.Id }, freelancer);
+        return CreatedAtAction(nameof(GetFreelancerById), new { id = freelancer.Id }, freelancer);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetFreelancer(int id)
+    public async Task<IActionResult> GetFreelancerById(int id)
     {
         var freelancer = await _freelancerService.GetFreelancerByIdAsync(id);
         return freelancer == null ? NotFound() : Ok(freelancer);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetAllFreelancers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    // GET api/Freelancers/all
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllFreelancers()
     {
-        var freelancers = await _freelancerService.GetAllFreelancersAsync(page, pageSize);
+        var freelancers = await _freelancerService.GetAllFreelancersAsync();
+        return Ok(freelancers);
+    }
+
+    // GET api/Freelancers/paged?page=1&pageSize=10
+    [HttpGet("paged")]
+    public async Task<IActionResult> GetFreelancersPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+    {
+        var freelancers = await _freelancerService.GetFreelancersPagedAsync(page, pageSize);
         return Ok(freelancers);
     }
 

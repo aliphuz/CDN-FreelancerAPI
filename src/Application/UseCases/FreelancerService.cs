@@ -32,9 +32,14 @@ public class FreelancerService
         return await _repository.GetByIdAsync(id);
     }
 
-    public async Task<IEnumerable<Freelancer>> GetAllFreelancersAsync(int page = 1, int pageSize = 10)
+    public async Task<IEnumerable<Freelancer>> GetFreelancersPagedAsync(int page = 1, int pageSize = 10)
     {
         return await _repository.GetAllAsync(page, pageSize);
+    }
+
+    public async Task<IEnumerable<Freelancer>> GetAllFreelancersAsync()
+    {
+        return await _repository.GetAllAsync();
     }
 
     public async Task<Freelancer> UpdateFreelancerAsync(int id, UpdateFreelancerDto dto)

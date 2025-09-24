@@ -11,7 +11,7 @@ const api = axios.create({
 
 export const freelancerApi = {
   getAll: (page = 1, pageSize = 10) => 
-    api.get(`/freelancers?page=${page}&pageSize=${pageSize}`),
+    api.get(`/freelancers/paged?page=${page}&pageSize=${pageSize}`),
   
   getById: (id) => 
     api.get(`/freelancers/${id}`),
