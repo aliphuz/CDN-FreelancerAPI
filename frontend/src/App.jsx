@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { freelancerApi } from './services/api';
 import FreelancerTable from './components/FreelancerTable';
@@ -91,14 +92,14 @@ function App() {
                 onDelete={handleDelete}
               />
 
-              {/* Pagination Controls */}
+              {/* Updated Pagination Controls */}
               <div className={styles.pagination}>
                 <button 
                   onClick={() => setPage((p) => Math.max(p - 1, 1))} 
                   disabled={page === 1}
                   className={styles.pageButton}
                 >
-                  ⬅ Previous
+                  ← Previous
                 </button>
 
                 <span className={styles.pageInfo}>Page {page}</span>
@@ -108,7 +109,7 @@ function App() {
                   disabled={freelancers.length < pageSize}
                   className={styles.pageButton}
                 >
-                  Next ➡
+                  Next →
                 </button>
               </div>
             </>

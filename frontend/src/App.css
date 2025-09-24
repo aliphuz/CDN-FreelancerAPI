@@ -70,32 +70,41 @@
 }
 
 .pagination {
-  margin-top: 20px;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
 }
 
 .pageButton {
-  background-color: #ff6b35;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 8px 14px;
-  margin: 0 5px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
   font-size: 14px;
-  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .pageButton:hover:not(:disabled) {
-  background-color: #e85a2d;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .pageButton:disabled {
-  background-color: #ccc;
+  background: #e0e0e0;
+  color: #999;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .pageInfo {
-  font-weight: bold;
-  margin: 0 10px;
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
 }
