@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { freelancerApi } from './services/api';
 import FreelancerTable from './components/FreelancerTable';
@@ -14,13 +13,22 @@ function App() {
 
   const [currentView, setCurrentView] = useState('list');
   const [editingFreelancer, setEditingFreelancer] = useState(null);
+  
+  // Search state
+  const [searchKeyword, setSearchKeyword] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    loadFreelancers();
-  }, [page]);
+    if (searchKeyword.trim()) {
+      handleSearch();
+    } else {
+      loadFreelancers();
+    }
+  }, [page, searchKeyword]);
 
   const loadFreelancers = async () => {
     setLoading(true);
+    setIsSearching(false);
     try {
       const response = await freelancerApi.getAll(page, pageSize);
       setFreelancers(response.data);
@@ -29,6 +37,42 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async () => {
+    if (!searchKeyword.trim()) {
+      loadFreelancers();
+      return;
+    }
+
+    setLoading(true);
+    setIsSearching(true);
+    try {
+      const response = await freelancerApi.search(searchKeyword);
+      setFreelancers(response.data);
+      setPage(1); // Reset to first page when searching
+    } catch (error) {
+      console.error('Error searching freelancers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchKeyword(value);
+    
+    // If search is cleared, reload all freelancers
+    if (!value.trim()) {
+      setIsSearching(false);
+      setPage(1);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchKeyword('');
+    setIsSearching(false);
+    setPage(1);
   };
 
   const handleAddNew = () => {
@@ -59,7 +103,11 @@ function App() {
   const handleDelete = async (id) => {
     try {
       await freelancerApi.delete(id);
-      await loadFreelancers();
+      if (searchKeyword.trim()) {
+        await handleSearch();
+      } else {
+        await loadFreelancers();
+      }
     } catch (error) {
       console.error('Error deleting freelancer:', error);
     }
@@ -76,9 +124,36 @@ function App() {
       
       {currentView === 'list' && (
         <>
-          <button onClick={handleAddNew} className={styles.addButton}>
-            ➕ Add New Freelancer
-          </button>
+          <div className={styles.actionBar}>
+            <button onClick={handleAddNew} className={styles.addButton}>
+              ➕ Add New Freelancer
+            </button>
+
+            <div className={styles.searchContainer}>
+              <input
+                type="text"
+                placeholder="Search freelancers..."
+                value={searchKeyword}
+                onChange={handleSearchChange}
+                className={styles.searchInput}
+              />
+              {searchKeyword && (
+                <button 
+                  onClick={handleClearSearch}
+                  className={styles.clearButton}
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {isSearching && searchKeyword && (
+            <div className={styles.searchIndicator}>
+              Showing results for: "<strong>{searchKeyword}</strong>"
+            </div>
+          )}
 
           {loading ? (
             <div style={{ textAlign: 'center', color: '#ff6b35', fontSize: '18px' }}>
@@ -92,26 +167,38 @@ function App() {
                 onDelete={handleDelete}
               />
 
-              {/* Updated Pagination Controls */}
-              <div className={styles.pagination}>
-                <button 
-                  onClick={() => setPage((p) => Math.max(p - 1, 1))} 
-                  disabled={page === 1}
-                  className={styles.pageButton}
-                >
-                  ← Previous
-                </button>
+              {/* Show pagination only when not searching */}
+              {!isSearching && (
+                <div className={styles.pagination}>
+                  <button 
+                    onClick={() => setPage((p) => Math.max(p - 1, 1))} 
+                    disabled={page === 1}
+                    className={styles.pageButton}
+                  >
+                    ← Previous
+                  </button>
 
-                <span className={styles.pageInfo}>Page {page}</span>
+                  <span className={styles.pageInfo}>Page {page}</span>
 
-                <button 
-                  onClick={() => setPage((p) => p + 1)} 
-                  disabled={freelancers.length < pageSize}
-                  className={styles.pageButton}
-                >
-                  Next →
-                </button>
-              </div>
+                  <button 
+                    onClick={() => setPage((p) => p + 1)} 
+                    disabled={freelancers.length < pageSize}
+                    className={styles.pageButton}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+
+              {/* Show message when no results found */}
+              {freelancers.length === 0 && !loading && (
+                <div className={styles.noResults}>
+                  {isSearching ? 
+                    `No freelancers found matching "${searchKeyword}"` : 
+                    'No freelancers found'
+                  }
+                </div>
+              )}
             </>
           )}
         </>
