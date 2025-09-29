@@ -29,7 +29,7 @@ public class FreelancersController : ControllerBase
         return freelancer == null ? NotFound() : Ok(freelancer);
     }
 
-    // GET api/Freelancers/all
+   
     [HttpGet("all")]
     public async Task<IActionResult> GetAllFreelancers()
     {
@@ -37,7 +37,7 @@ public class FreelancersController : ControllerBase
         return Ok(freelancers);
     }
 
-    // GET api/Freelancers/paged?page=1&pageSize=10
+    
     [HttpGet("paged")]
     public async Task<IActionResult> GetFreelancersPaged([FromQuery] int pageNumber, [FromQuery] int pageSize )
     {
