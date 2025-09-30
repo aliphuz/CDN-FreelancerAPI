@@ -20,27 +20,39 @@ public class FreelancerService
             Username = dto.Username,
             Email = dto.Email,
             Phone = dto.Phone,
-            Skillsets = dto.Skillsets.Select(s => new Skillset { SkillName = s }).ToList(),
-            Hobbies = dto.Hobbies.Select(h => new Hobby { HobbyName = h }).ToList()
         };
+        var createdFreelancer = await _repository.CreateAsync(freelancer);
 
-        return await _repository.CreateAsync(freelancer);
+        
+        await _repository.AssignSkillsetsAsync(createdFreelancer.Id, dto.SkillsetIds);
+        await _repository.AssignHobbiesAsync(createdFreelancer.Id, dto.HobbyIds);
+
+        return await _repository.GetByIdAsync(createdFreelancer.Id) ?? createdFreelancer;
     }
+
+    public async Task<IEnumerable<SkillsetOptions>> GetSkillOptionsAsync()
+    {
+        return await _repository.GetSkillOptionsAsync();
+    }
+
+    public async Task<IEnumerable<HobbyOptions>> GetHobbyOptionsAsync()
+    {
+        return await _repository.GetHobbyOptionsAsync();
+    }
+
+
 
     public async Task<Freelancer?> GetFreelancerByIdAsync(int id)
     {
         return await _repository.GetByIdAsync(id);
     }
 
-    public async Task<IEnumerable<Freelancer>> GetFreelancersPagedAsync(int pageNumber, int pageSize)
+    public async Task<IEnumerable<Freelancer>> GetFreelancersPagedAsync(int pageNumber, int pageSize, string? keyword = null)
     {
-        return await _repository.GetAllAsync(pageNumber, pageSize);
+        return await _repository.GetAllAsync(pageNumber, pageSize,keyword);
     }
 
-    public async Task<IEnumerable<Freelancer>> GetAllFreelancersAsync()
-    {
-        return await _repository.GetAllAsync();
-    }
+  
 
     public async Task<Freelancer> UpdateFreelancerAsync(int id, UpdateFreelancerDto dto)
     {
@@ -50,11 +62,14 @@ public class FreelancerService
             Username = dto.Username,
             Email = dto.Email,
             Phone = dto.Phone,
-            Skillsets = dto.Skillsets.Select(s => new Skillset { SkillName = s, FreelancerId = id }).ToList(),
-            Hobbies = dto.Hobbies.Select(h => new Hobby { HobbyName = h, FreelancerId = id }).ToList()
         };
+        var updatedFreelancer = await _repository.UpdateAsync(freelancer);
 
-        return await _repository.UpdateAsync(freelancer);
+        
+        await _repository.AssignSkillsetsAsync(id, dto.SkillsetIds);
+        await _repository.AssignHobbiesAsync(id, dto.HobbyIds);
+
+        return await _repository.GetByIdAsync(id) ?? updatedFreelancer;
     }
 
     public async Task DeleteFreelancerAsync(int id)
@@ -62,10 +77,6 @@ public class FreelancerService
         await _repository.DeleteAsync(id);
     }
 
-    public async Task<IEnumerable<Freelancer>> SearchFreelancersAsync(string keyword)
-    {
-        return await _repository.SearchAsync(keyword);
-    }
 
     public async Task ArchiveFreelancerAsync(int id, bool archive)
     {

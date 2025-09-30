@@ -27,8 +27,7 @@ public class FreelancerServiceTests
             Username = "testuser",
             Email = "test@example.com",
             Phone = "1234567890",
-            Skillsets = new List<string> { "C#", "JavaScript" },
-            Hobbies = new List<string> { "Reading", "Gaming" }
+            
         };
 
         var expectedFreelancer = new Freelancer

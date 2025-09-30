@@ -1,33 +1,24 @@
-import axios from 'axios';
+.chipContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-const API_BASE_URL = 'https://localhost:60300/api';
+.chip {
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: #eee;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 14px;
+}
 
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+.chip:hover {
+  background: #ddd;
+}
 
-export const freelancerApi = {
-  getAll: (page = 1, pageSize = 10) => 
-    api.get(`/freelancers/paged?pageNumber=${page}&pageSize=${pageSize}`),
-  
-  getById: (id) => 
-    api.get(`/freelancers/${id}`),
-  
-  create: (freelancer) => 
-    api.post('/freelancers', freelancer),
-  
-  update: (id, freelancer) => 
-    api.put(`/freelancers/${id}`, freelancer),
-  
-  delete: (id) => 
-    api.delete(`/freelancers/${id}`),
-  
-  search: (keyword) => 
-    api.get(`/freelancers/search?keyword=${keyword}`),
-  
-  archive: (id, isArchived) => 
-    api.patch(`/freelancers/${id}/archive`, { isArchived }),
-};
+.chip.selected {
+  background: #ff6b35;
+  color: white;
+  font-weight: bold;
+}

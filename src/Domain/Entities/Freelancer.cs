@@ -1,5 +1,3 @@
-namespace CDN.FreelancerAPI.Domain.Entities;
-
 public class Freelancer
 {
     public int Id { get; set; }
@@ -7,9 +5,19 @@ public class Freelancer
     public string Email { get; set; } = string.Empty;
     public string Phone { get; set; } = string.Empty;
     public bool IsArchived { get; set; }
-    public List<Skillset> Skillsets { get; set; } = new();
-    public List<Hobby> Hobbies { get; set; } = new();
-    public int PageNumber { get; set; } = 1;
 
-    public int PageSize { get; set; } = 10; 
+    public List<HobbyOptions> Hobbies { get; set; } = new();
+    public List<SkillsetOptions> Skillsets { get; set; } = new();
+}
+
+public class HobbyOptions
+{
+    public int Id { get; set; }
+    public string HobbyName { get; set; } = string.Empty;
+}
+
+public class SkillsetOptions
+{
+    public int Id { get; set; }
+    public string SkillName { get; set; } = string.Empty;
 }

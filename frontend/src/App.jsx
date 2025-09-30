@@ -19,44 +19,28 @@ function App() {
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    if (searchKeyword.trim()) {
-      handleSearch();
-    } else {
-      loadFreelancers();
-    }
-  }, [page, searchKeyword]);
+  loadFreelancers();
+}, [page, searchKeyword]);
+
 
   const loadFreelancers = async () => {
-    setLoading(true);
-    setIsSearching(false);
-    try {
-      const response = await freelancerApi.getAll(page, pageSize);
-      setFreelancers(response.data);
-    } catch (error) {
-      console.error('Error loading freelancers:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const response = await freelancerApi.getAll(page, pageSize, searchKeyword);
+    setFreelancers(response.data);
 
-  const handleSearch = async () => {
-    if (!searchKeyword.trim()) {
-      loadFreelancers();
-      return;
+    if (searchKeyword.trim()) {
+      setIsSearching(true);
+      setPage(1); 
+    } else {
+      setIsSearching(false);
     }
-
-    setLoading(true);
-    setIsSearching(true);
-    try {
-      const response = await freelancerApi.search(searchKeyword);
-      setFreelancers(response.data);
-      setPage(1); // Reset to first page when searching
-    } catch (error) {
-      console.error('Error searching freelancers:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    console.error('Error loading freelancers:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSearchChange = (e) => {
     const value = e.target.value;

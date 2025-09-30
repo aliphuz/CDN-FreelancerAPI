@@ -6,10 +6,14 @@ public interface IFreelancerRepository
 {
     Task<Freelancer> CreateAsync(Freelancer freelancer);
     Task<Freelancer?> GetByIdAsync(int id);
-    Task<IEnumerable<Freelancer>> GetAllAsync();
-    Task<IEnumerable<Freelancer>> GetAllAsync(int pageNumber, int pageSize);
+    
+    Task<IEnumerable<Freelancer>> GetAllAsync(int pageNumber, int pageSize, string keyword);
     Task<Freelancer> UpdateAsync(Freelancer freelancer);
     Task DeleteAsync(int id);
-    Task<IEnumerable<Freelancer>> SearchAsync(string keyword);
+    
     Task ArchiveAsync(int id, bool archive);
+    Task AssignSkillsetsAsync(int freelancerId, List<int> skillsetIds);
+    Task AssignHobbiesAsync(int freelancerId, List<int> hobbyIds);
+    Task<IEnumerable<SkillsetOptions>> GetSkillOptionsAsync();
+    Task<IEnumerable<HobbyOptions>> GetHobbyOptionsAsync();
 }

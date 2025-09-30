@@ -1,78 +1,53 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/FreelancerForm.module.css';
+import { freelancerApi } from '../services/api';
 
 const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     phone: '',
-    skillsets: [],
-    hobbies: []
+    skillsetIds: [],
+    hobbyIds: []
   });
-  
-  const [skillInput, setSkillInput] = useState('');
-  const [hobbyInput, setHobbyInput] = useState('');
+
+  const [skillOptions, setSkillOptions] = useState([]);
+  const [hobbyOptions, setHobbyOptions] = useState([]);
 
   useEffect(() => {
+    // Load options from backend
+    const loadOptions = async () => {
+      const skills = await freelancerApi.getSkillOptions();
+      const hobbies = await freelancerApi.getHobbyOptions();
+      setSkillOptions(skills.data);
+      setHobbyOptions(hobbies.data);
+    };
+    loadOptions();
+
     if (freelancer) {
       setFormData({
         username: freelancer.username || '',
         email: freelancer.email || '',
         phone: freelancer.phone || '',
-        skillsets: freelancer.skillsets?.map(s => s.skillName || s) || [],
-        hobbies: freelancer.hobbies?.map(h => h.hobbyName || h) || []
+        skillsetIds: freelancer.skillsets?.map(s => s.id) || [],
+        hobbyIds: freelancer.hobbies?.map(h => h.id) || []
       });
     }
   }, [freelancer]);
 
+  const toggleSelection = (type, id) => {
+    setFormData(prev => {
+      const list = prev[type];
+      return {
+        ...prev,
+        [type]: list.includes(id) ? list.filter(x => x !== id) : [...list, id]
+      };
+    });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    const freelancerData = {
-      ...formData,
-      id: freelancer?.id || Date.now()
-    };
-    onSave(freelancerData);
-  };
-
-  const addSkill = () => {
-    if (skillInput.trim() && !formData.skillsets.includes(skillInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        skillsets: [...prev.skillsets, skillInput.trim()]
-      }));
-      setSkillInput('');
-    }
-  };
-
-  const removeSkill = (skill) => {
-    setFormData(prev => ({
-      ...prev,
-      skillsets: prev.skillsets.filter(s => s !== skill)
-    }));
-  };
-
-  const addHobby = () => {
-    if (hobbyInput.trim() && !formData.hobbies.includes(hobbyInput.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        hobbies: [...prev.hobbies, hobbyInput.trim()]
-      }));
-      setHobbyInput('');
-    }
-  };
-
-  const removeHobby = (hobby) => {
-    setFormData(prev => ({
-      ...prev,
-      hobbies: prev.hobbies.filter(h => h !== hobby)
-    }));
-  };
-
-  const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    onSave(formData);
   };
 
   return (
@@ -80,116 +55,52 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
       <h2 className={styles.formTitle}>
         {freelancer ? 'Edit Freelancer' : 'Add New Freelancer'}
       </h2>
-      
+
+      {/* Basic fields */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Username:</label>
-        <input
-          type="text"
-          name="username"
-          value={formData.username}
-          onChange={handleChange}
-          required
-          className={styles.input}
-        />
+        <label>Username</label>
+        <input type="text" value={formData.username}
+               onChange={e => setFormData({ ...formData, username: e.target.value })}
+               required />
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label}>Email:</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          className={styles.input}
-        />
+        <label>Email</label>
+        <input type="email" value={formData.email}
+               onChange={e => setFormData({ ...formData, email: e.target.value })}
+               required />
       </div>
 
       <div className={styles.formGroup}>
-        <label className={styles.label}>Phone:</label>
-        <input
-          type="text"
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          required
-          className={styles.input}
-        />
+        <label>Phone</label>
+        <input type="text" value={formData.phone}
+               onChange={e => setFormData({ ...formData, phone: e.target.value })}
+               required />
       </div>
 
+      {/* Skill selection */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Skills:</label>
-        <div style={{ display: 'flex', marginBottom: '10px' }}>
-          <input
-            type="text"
-            value={skillInput}
-            onChange={(e) => setSkillInput(e.target.value)}
-            placeholder="Add skill"
-            className={styles.input}
-            style={{ marginRight: '10px' }}
-          />
-          <button type="button" onClick={addSkill} className={styles.saveButton}>
-            Add
-          </button>
-        </div>
-        <div>
-          {formData.skillsets.map((skill, index) => (
-            <span key={index} style={{ 
-              display: 'inline-block', 
-              background: '#ff6b35', 
-              color: 'white',
-              padding: '5px 10px', 
-              margin: '2px', 
-              borderRadius: '15px',
-              fontSize: '12px'
-            }}>
-              {skill}
-              <button 
-                type="button" 
-                onClick={() => removeSkill(skill)}
-                style={{ marginLeft: '5px', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
-              >
-                ×
-              </button>
+        <label>Skills</label>
+        <div className={styles.chipContainer}>
+          {skillOptions.map(skill => (
+            <span key={skill.id}
+                  onClick={() => toggleSelection("skillsetIds", skill.id)}
+                  className={`${styles.chip} ${formData.skillsetIds.includes(skill.id) ? styles.selected : ''}`}>
+              {skill.skillName}
             </span>
           ))}
         </div>
       </div>
 
+      {/* Hobby selection */}
       <div className={styles.formGroup}>
-        <label className={styles.label}>Hobbies:</label>
-        <div style={{ display: 'flex', marginBottom: '10px' }}>
-          <input
-            type="text"
-            value={hobbyInput}
-            onChange={(e) => setHobbyInput(e.target.value)}
-            placeholder="Add hobby"
-            className={styles.input}
-            style={{ marginRight: '10px' }}
-          />
-          <button type="button" onClick={addHobby} className={styles.saveButton}>
-            Add
-          </button>
-        </div>
-        <div>
-          {formData.hobbies.map((hobby, index) => (
-            <span key={index} style={{ 
-              display: 'inline-block', 
-              background: '#666', 
-              color: 'white',
-              padding: '5px 10px', 
-              margin: '2px', 
-              borderRadius: '15px',
-              fontSize: '12px'
-            }}>
-              {hobby}
-              <button 
-                type="button" 
-                onClick={() => removeHobby(hobby)}
-                style={{ marginLeft: '5px', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}
-              >
-                ×
-              </button>
+        <label>Hobbies</label>
+        <div className={styles.chipContainer}>
+          {hobbyOptions.map(hobby => (
+            <span key={hobby.id}
+                  onClick={() => toggleSelection("hobbyIds", hobby.id)}
+                  className={`${styles.chip} ${formData.hobbyIds.includes(hobby.id) ? styles.selected : ''}`}>
+              {hobby.hobbyName}
             </span>
           ))}
         </div>

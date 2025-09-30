@@ -29,28 +29,24 @@ public class FreelancersController : ControllerBase
         return freelancer == null ? NotFound() : Ok(freelancer);
     }
 
-   
-    [HttpGet("all")]
-    public async Task<IActionResult> GetAllFreelancers()
+
+    [HttpGet("options")]
+    public async Task<IActionResult> GetOptions()
     {
-        var freelancers = await _freelancerService.GetAllFreelancersAsync();
-        return Ok(freelancers);
+        var skills = await _freelancerService.GetSkillOptionsAsync();
+        var hobbies = await _freelancerService.GetHobbyOptionsAsync();
+        return Ok(new { skillsets = skills, hobbies = hobbies });
     }
 
-    
+
+
     [HttpGet("paged")]
-    public async Task<IActionResult> GetFreelancersPaged([FromQuery] int pageNumber, [FromQuery] int pageSize )
+    public async Task<IActionResult> GetFreelancersPaged([FromQuery] int pageNumber, [FromQuery] int pageSize, [FromQuery] string? search = null)
     {
-        var freelancers = await _freelancerService.GetFreelancersPagedAsync(pageNumber, pageSize);
+        var freelancers = await _freelancerService.GetFreelancersPagedAsync(pageNumber, pageSize, search);
         return Ok(freelancers);
     }
 
-    [HttpGet("search")]
-    public async Task<IActionResult> SearchFreelancers([FromQuery] string keyword)
-    {
-        var freelancers = await _freelancerService.SearchFreelancersAsync(keyword);
-        return Ok(freelancers);
-    }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateFreelancer(int id, [FromBody] UpdateFreelancerDto dto)
