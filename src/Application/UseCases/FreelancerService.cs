@@ -15,6 +15,8 @@ public class FreelancerService
 
     public async Task<Freelancer> CreateFreelancerAsync(CreateFreelancerDto dto)
     {
+        if (await _repository.IsEmailExistAsync(dto.Email))
+            throw new Exception("Email already exists.");
         var freelancer = new Freelancer
         {
             Username = dto.Username,

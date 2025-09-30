@@ -126,3 +126,15 @@
 .checkboxContainer:hover .customCheckbox {
   box-shadow: 0 0 5px rgba(0, 112, 243, 0.5);
 }
+.error {
+  color: #D8000C;
+  background-color: #FFD2D2;
+  padding: 8px 12px;
+  margin-top: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+h2 span {
+  color: #007BFF;
+}

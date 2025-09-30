@@ -18,6 +18,8 @@ public class FreelancersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateFreelancer([FromBody] CreateFreelancerDto dto)
     {
+       
+
         var freelancer = await _freelancerService.CreateFreelancerAsync(dto);
         return CreatedAtAction(nameof(GetFreelancerById), new { id = freelancer.Id }, freelancer);
     }

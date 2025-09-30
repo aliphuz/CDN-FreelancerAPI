@@ -56,6 +56,18 @@ public class FreelancerRepository : IFreelancerRepository
         }
     }
 
+    public async Task<bool> IsEmailExistAsync(string email)
+    {
+        using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        var count = await connection.QuerySingleAsync<int>(
+            "SELECT COUNT(1) FROM Freelancers WHERE Email = @Email",
+            new { Email = email });
+
+        return count > 0;
+    }
+
     public async Task AssignSkillsetsAsync(int freelancerId, List<int> skillsetIds)
     {
         using var connection = new SqlConnection(_connectionString);

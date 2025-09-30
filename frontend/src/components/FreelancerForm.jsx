@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { freelancerApi } from '../services/api';
 import styles from '../styles/FreelancerForm.module.css';
 
-const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
+const FreelancerForm = ({ freelancer, onCancel }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -12,8 +12,9 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
   });
 
   const [options, setOptions] = useState({ skillsets: [], hobbies: [] });
+  const [message, setMessage] = useState(null); // for backend errors / success
 
- 
+  // Load skill and hobby options
   useEffect(() => {
     const loadOptions = async () => {
       try {
@@ -26,7 +27,7 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
     loadOptions();
   }, []);
 
-  
+  // Populate form if editing
   useEffect(() => {
     if (freelancer) {
       setFormData({
@@ -39,12 +40,7 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
     }
   }, [freelancer]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    onSave(formData); 
-  };
-
+  // Toggle skills/hobbies selection
   const toggleSelection = (id, listName) => {
     setFormData(prev => {
       const list = prev[listName];
@@ -57,11 +53,46 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
     });
   };
 
+  // Submit handler
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage(null);
+
+    try {
+      if (freelancer) {
+        // Update existing
+        await freelancerApi.update(freelancer.id, formData);
+        alert('Updated successfully!');
+      } else {
+        // Create new
+        await freelancerApi.create(formData);
+        alert('Saved successfully!');
+      }
+      onCancel(); // Close form only on success
+    } catch (err) {
+      console.error('Error saving freelancer:', err);
+
+      // Backend custom error (like duplicate email)
+      if (err.response?.data?.details) {
+        setMessage(err.response.data.details);
+      } else if (err.response?.data?.errors) {
+        // FluentValidation errors
+        const apiErrors = err.response.data.errors;
+        const firstError = apiErrors.Username?.[0] || apiErrors.Email?.[0] || apiErrors.Phone?.[0];
+        setMessage(firstError || 'Something went wrong.');
+      } else {
+        setMessage(err.response?.data?.message || 'Something went wrong.');
+      }
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className={styles.form}>
       <h2 className={styles.formTitle}>
         {freelancer ? 'Edit Freelancer' : 'Add New Freelancer'}
       </h2>
+
+      {message && <p className={styles.error}>{message}</p>}
 
       {/* Username */}
       <div className={styles.formGroup}>
@@ -134,6 +165,7 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
         ))}
       </div>
 
+      {/* Buttons */}
       <div className={styles.buttonGroup}>
         <button type="submit" className={styles.saveButton}>
           {freelancer ? 'Update' : 'Save'}
