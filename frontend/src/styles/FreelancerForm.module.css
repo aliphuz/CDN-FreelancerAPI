@@ -79,3 +79,50 @@
 .cancelButton:hover {
   background-color: #555;
 }
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxContainer input[type="checkbox"] {
+  display: none;
+}
+
+.customCheckbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #0070f3;
+  border-radius: 5px;
+  margin-right: 8px;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.customCheckbox::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.checkboxContainer input[type="checkbox"]:checked + .customCheckbox {
+  background-color: #0070f3;
+}
+
+.checkboxContainer input[type="checkbox"]:checked + .customCheckbox::after {
+  opacity: 1;
+}
+
+.checkboxContainer:hover .customCheckbox {
+  box-shadow: 0 0 5px rgba(0, 112, 243, 0.5);
+}

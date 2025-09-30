@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import styles from '../styles/FreelancerForm.module.css';
 import { freelancerApi } from '../services/api';
+import styles from '../styles/FreelancerForm.module.css';
 
 const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -11,19 +11,23 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
     hobbyIds: []
   });
 
-  const [skillOptions, setSkillOptions] = useState([]);
-  const [hobbyOptions, setHobbyOptions] = useState([]);
+  const [options, setOptions] = useState({ skillsets: [], hobbies: [] });
 
+ 
   useEffect(() => {
-    // Load options from backend
     const loadOptions = async () => {
-      const skills = await freelancerApi.getSkillOptions();
-      const hobbies = await freelancerApi.getHobbyOptions();
-      setSkillOptions(skills.data);
-      setHobbyOptions(hobbies.data);
+      try {
+        const res = await freelancerApi.getOptions();
+        setOptions(res.data);
+      } catch (err) {
+        console.error("Error loading options:", err);
+      }
     };
     loadOptions();
+  }, []);
 
+  
+  useEffect(() => {
     if (freelancer) {
       setFormData({
         username: freelancer.username || '',
@@ -35,19 +39,22 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
     }
   }, [freelancer]);
 
-  const toggleSelection = (type, id) => {
-    setFormData(prev => {
-      const list = prev[type];
-      return {
-        ...prev,
-        [type]: list.includes(id) ? list.filter(x => x !== id) : [...list, id]
-      };
-    });
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    
+    onSave(formData); 
+  };
+
+  const toggleSelection = (id, listName) => {
+    setFormData(prev => {
+      const list = prev[listName];
+      return {
+        ...prev,
+        [listName]: list.includes(id)
+          ? list.filter(i => i !== id)
+          : [...list, id]
+      };
+    });
   };
 
   return (
@@ -56,54 +63,75 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
         {freelancer ? 'Edit Freelancer' : 'Add New Freelancer'}
       </h2>
 
-      {/* Basic fields */}
+      {/* Username */}
       <div className={styles.formGroup}>
-        <label>Username</label>
-        <input type="text" value={formData.username}
-               onChange={e => setFormData({ ...formData, username: e.target.value })}
-               required />
+        <label className={styles.label}>Username:</label>
+        <input
+          type="text"
+          name="username"
+          value={formData.username}
+          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+          required
+          className={styles.input}
+        />
       </div>
 
+      {/* Email */}
       <div className={styles.formGroup}>
-        <label>Email</label>
-        <input type="email" value={formData.email}
-               onChange={e => setFormData({ ...formData, email: e.target.value })}
-               required />
+        <label className={styles.label}>Email:</label>
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          required
+          className={styles.input}
+        />
       </div>
 
+      {/* Phone */}
       <div className={styles.formGroup}>
-        <label>Phone</label>
-        <input type="text" value={formData.phone}
-               onChange={e => setFormData({ ...formData, phone: e.target.value })}
-               required />
+        <label className={styles.label}>Phone:</label>
+        <input
+          type="text"
+          name="phone"
+          value={formData.phone}
+          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+          required
+          className={styles.input}
+        />
       </div>
 
-      {/* Skill selection */}
+      {/* Skills */}
       <div className={styles.formGroup}>
-        <label>Skills</label>
-        <div className={styles.chipContainer}>
-          {skillOptions.map(skill => (
-            <span key={skill.id}
-                  onClick={() => toggleSelection("skillsetIds", skill.id)}
-                  className={`${styles.chip} ${formData.skillsetIds.includes(skill.id) ? styles.selected : ''}`}>
-              {skill.skillName}
-            </span>
-          ))}
-        </div>
+        <label className={styles.label}>Skills:</label>
+        {options.skillsets.map(skill => (
+          <label key={skill.id} className={styles.checkboxContainer}>
+            <input
+              type="checkbox"
+              checked={formData.skillsetIds.includes(skill.id)}
+              onChange={() => toggleSelection(skill.id, 'skillsetIds')}
+            />
+            <span className={styles.customCheckbox}></span>
+            {skill.skillName}
+          </label>
+        ))}
       </div>
 
-      {/* Hobby selection */}
+      {/* Hobbies */}
       <div className={styles.formGroup}>
-        <label>Hobbies</label>
-        <div className={styles.chipContainer}>
-          {hobbyOptions.map(hobby => (
-            <span key={hobby.id}
-                  onClick={() => toggleSelection("hobbyIds", hobby.id)}
-                  className={`${styles.chip} ${formData.hobbyIds.includes(hobby.id) ? styles.selected : ''}`}>
-              {hobby.hobbyName}
-            </span>
-          ))}
-        </div>
+        <label className={styles.label}>Hobbies:</label>
+        {options.hobbies.map(hobby => (
+          <label key={hobby.id} className={styles.checkboxContainer}>
+            <input
+              type="checkbox"
+              checked={formData.hobbyIds.includes(hobby.id)}
+              onChange={() => toggleSelection(hobby.id, 'hobbyIds')}
+            />
+            <span className={styles.customCheckbox}></span>
+            {hobby.hobbyName}
+          </label>
+        ))}
       </div>
 
       <div className={styles.buttonGroup}>

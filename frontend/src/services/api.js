@@ -1,24 +1,38 @@
-.chipContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+import axios from 'axios';
 
-.chip {
-  padding: 6px 12px;
-  border-radius: 16px;
-  background: #eee;
-  cursor: pointer;
-  transition: 0.2s;
-  font-size: 14px;
-}
+const API_BASE_URL = 'https://localhost:60300/api';
 
-.chip:hover {
-  background: #ddd;
-}
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-.chip.selected {
-  background: #ff6b35;
-  color: white;
-  font-weight: bold;
-}
+export const freelancerApi = {
+  getAll: (page = 1, pageSize = 10, search = null) => {
+    let url = `/freelancers/paged?pageNumber=${page}&pageSize=${pageSize}`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    return api.get(url);
+  },
+
+  getById: (id) => 
+    api.get(`/freelancers/${id}`),
+  
+  create: (freelancer) => 
+    api.post('/freelancers', freelancer),
+  
+  update: (id, freelancer) => 
+    api.put(`/freelancers/${id}`, freelancer),
+  
+  delete: (id) => 
+    api.delete(`/freelancers/${id}`),
+   
+  archive: (id, isArchived) => 
+    api.patch(`/freelancers/${id}/archive`, { isArchived }),
+
+ getOptions: () => 
+  api.get('/freelancers/options'), 
+};
