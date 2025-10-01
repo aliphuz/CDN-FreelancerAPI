@@ -36,25 +36,6 @@ const FreelancerList = ({ onEdit, onView }) => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure?')) {
-      try {
-        await freelancerApi.delete(id);
-        loadFreelancers(page);
-      } catch (error) {
-        console.error('Error deleting:', error);
-      }
-    }
-  };
-
-  const handleArchive = async (id, isArchived) => {
-    try {
-      await freelancerApi.archive(id, !isArchived);
-      loadFreelancers(page);
-    } catch (error) {
-      console.error('Error archiving:', error);
-    }
-  };
 
   if (loading) return <div>Loading...</div>;
 
@@ -94,23 +75,6 @@ const FreelancerList = ({ onEdit, onView }) => {
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>{freelancer.phone}</td>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>
                 {freelancer.isArchived ? 'Archived' : 'Active'}
-              </td>
-              <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                <button onClick={() => onView(freelancer.id)} style={{ marginRight: '5px', padding: '4px 8px', backgroundColor: '#17a2b8', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}>
-                  View
-                </button>
-                <button onClick={() => onEdit(freelancer)} style={{ marginRight: '5px', padding: '4px 8px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}>
-                  Edit
-                </button>
-                <button 
-                  onClick={() => handleArchive(freelancer.id, freelancer.isArchived)}
-                  style={{ marginRight: '5px', padding: '4px 8px', backgroundColor: '#ffc107', color: 'black', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
-                >
-                  {freelancer.isArchived ? 'Unarchive' : 'Archive'}
-                </button>
-                <button onClick={() => handleDelete(freelancer.id)} style={{ padding: '4px 8px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}>
-                  Delete
-                </button>
               </td>
             </tr>
           ))}

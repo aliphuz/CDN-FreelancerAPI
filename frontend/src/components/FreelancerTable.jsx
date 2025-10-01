@@ -1,4 +1,5 @@
 import styles from '../styles/FreelancerTable.module.css';
+import { freelancerApi } from '../services/api';
 
 const FreelancerTable = ({ freelancers, onEdit, onDelete }) => {
   const handleDelete = (id, name) => {
@@ -6,6 +7,15 @@ const FreelancerTable = ({ freelancers, onEdit, onDelete }) => {
       onDelete(id);
     }
   };
+  const handleArchive = async (id, isArchived) => {
+    try {
+      await freelancerApi.archive(id, !isArchived);
+      window.location.reload(); 
+    } catch (error) {
+      console.error('Error archiving:', error);
+    }
+  };
+  
 
   return (
     <table className={styles.table}>
@@ -38,6 +48,12 @@ const FreelancerTable = ({ freelancers, onEdit, onDelete }) => {
               >
                 Delete
               </button>
+              <button 
+                  onClick={() => handleArchive(freelancer.id, freelancer.isArchived)}
+                  style={{ marginRight: '5px', padding: '4px 8px', backgroundColor: '#ffc107', color: 'black', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
+                >
+                  {freelancer.isArchived ? 'Unarchive' : 'Archive'}
+                </button>
             </td>
           </tr>
         ))}
