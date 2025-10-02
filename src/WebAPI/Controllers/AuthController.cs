@@ -40,4 +40,31 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+    [HttpPost("refresh")]
+    public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+    {
+        try
+        {
+            var user = await _auth.ValidateRefreshTokenAsync(refreshToken);
+            if (user == null)
+                return Unauthorized(new { error = "Invalid or expired refresh token" });
+
+            var newAccessToken = _auth.CreateToken(user);
+            var newRefreshToken = await _auth.GenerateAndSaveRefreshTokenAsync(user);
+
+            return Ok(new
+            {
+                token = newAccessToken,
+                refreshToken = newRefreshToken
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+
+
+
 }

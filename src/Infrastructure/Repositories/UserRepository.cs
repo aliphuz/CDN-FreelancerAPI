@@ -44,5 +44,19 @@ namespace CDN.FreelancerAPI.Infrastructure.Repositories
             user.Id = id;
             return id;
         }
+        public async Task UpdateRefreshTokenAsync(int userId, string refreshToken, DateTime expiry)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            var sql = "UPDATE Users SET RefreshToken = @RefreshToken, RefreshTokenExpiryTime = @Expiry WHERE Id = @UserId";
+            await connection.ExecuteAsync(sql, new { UserId = userId, RefreshToken = refreshToken, Expiry = expiry });
+        }
+
+        public async Task<User?> GetByRefreshTokenAsync(string refreshToken)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            var sql = "SELECT * FROM Users WHERE RefreshToken = @RefreshToken AND RefreshTokenExpiryTime > GETUTCDATE()";
+            return await connection.QueryFirstOrDefaultAsync<User>(sql, new { RefreshToken = refreshToken });
+        }
+
     }
 }

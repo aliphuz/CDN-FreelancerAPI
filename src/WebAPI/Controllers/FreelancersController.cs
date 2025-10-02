@@ -1,5 +1,6 @@
 using CDN.FreelancerAPI.Application.DTOs;
 using CDN.FreelancerAPI.Application.UseCases;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CDN.FreelancerAPI.WebAPI.Controllers;
@@ -31,7 +32,7 @@ public class FreelancersController : ControllerBase
         return freelancer == null ? NotFound() : Ok(freelancer);
     }
 
-
+    [Authorize]
     [HttpGet("options")]
     public async Task<IActionResult> GetOptions()
     {
@@ -41,7 +42,7 @@ public class FreelancersController : ControllerBase
     }
 
 
-
+   
     [HttpGet("paged")]
     public async Task<IActionResult> GetFreelancersPaged([FromQuery] int pageNumber, [FromQuery] int pageSize, [FromQuery] string? search = null)
     {

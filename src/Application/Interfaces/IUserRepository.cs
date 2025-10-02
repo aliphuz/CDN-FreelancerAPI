@@ -11,5 +11,7 @@ namespace CDN.FreelancerAPI.Application.Interfaces
     {
         Task<User?> GetByEmailAsync(string email);
         Task<int> CreateUserAsync(User user);
+        Task UpdateRefreshTokenAsync(int userId, string refreshToken, DateTime expiry);
+        Task<User?> GetByRefreshTokenAsync(string refreshToken);
     }
 }

@@ -52,16 +52,29 @@ namespace CDN.FreelancerAPI.Infrastructure.Services
                 throw new UnauthorizedAccessException("Invalid credentials");
 
             var token = CreateToken(user);
+            var refreshToken = await GenerateAndSaveRefreshTokenAsync(user);
 
             return new AuthResponseDto
             {
                 Token = token,
                 Username = user.username,
-                Role = user.Role
+                Role = user.Role,
+                RefreshToken = refreshToken
             };
         }
 
-        private string CreateToken(User user)
+        public async Task<User?> ValidateRefreshTokenAsync(string refreshToken)
+        {
+            var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
+
+            if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+                return null;
+
+            return user;
+        }
+
+
+        public string CreateToken(User user)
         {
             var claims = new List<Claim>
             {
@@ -83,6 +96,25 @@ namespace CDN.FreelancerAPI.Infrastructure.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomNumber);
+                return Convert.ToBase64String(randomNumber);
+            }
+        }
+
+        public async Task<string> GenerateAndSaveRefreshTokenAsync(User user)
+        {
+            var refreshToken = GenerateRefreshToken();
+            var expiry = DateTime.UtcNow.AddDays(7); 
+
+            await _userRepository.UpdateRefreshTokenAsync(user.Id, refreshToken, expiry);
+
+            return refreshToken;
         }
     }
 }
