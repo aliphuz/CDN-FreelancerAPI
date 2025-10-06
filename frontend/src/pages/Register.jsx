@@ -4,7 +4,7 @@ import styles from '../styles/Register.module.css';
 
 
 const Register = ({ onRegisterSuccess }) => {
-    const [form,setform] = useState({username:'',email:'',password:'',role:'User'});
+    const [form,setForm] = useState({username:'',email:'',password:'',role:'User'});
     const [message,setMessage] = useState('');
 
     const handleSubmit = async (e) => {

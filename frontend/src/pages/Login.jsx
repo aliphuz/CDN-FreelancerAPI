@@ -3,7 +3,7 @@ import { authApi } from '../services/api';
 import styles from '../styles/Login.module.css';
 
 const Login = ({ onLoginSuccess }) => {
-    const [form,setform] = useState({email:'',password:''});
+    const [form,setForm] = useState({email:'',password:''});
     const [error,seterror] = useState(null);
 
     const handleSubmit = async (e) => {
