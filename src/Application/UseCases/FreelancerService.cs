@@ -64,28 +64,47 @@ public class FreelancerService
         return await _repository.GetAllAsync(pageNumber, pageSize,keyword);
     }
 
-  
+
 
     public async Task<Freelancer> UpdateFreelancerAsync(int id, UpdateFreelancerDto dto, int userId, string userRole)
     {
         var freelancer = await _repository.GetByIdAsync(id)
-        ?? throw new KeyNotFoundException("Freelancer not found.");
+            ?? throw new KeyNotFoundException("Freelancer not found.");
 
         if (userRole == "User" && freelancer.UserId != userId)
             throw new UnauthorizedAccessException("You can only update your own freelancer profile.");
 
+        
         freelancer.Username = dto.Username ?? freelancer.Username;
         freelancer.Email = dto.Email ?? freelancer.Email;
         freelancer.Phone = dto.Phone ?? freelancer.Phone;
 
+        
+        if (!string.IsNullOrEmpty(dto.Email))
+        {
+            var exists = await _repository.IsEmailExistAsync(dto.Email);
+            if (exists && dto.Email != freelancer.Email)
+                throw new Exception("Email is already used by another freelancer.");
+        }
+
+        
         var updatedFreelancer = await _repository.UpdateAsync(freelancer);
 
         
-        await _repository.AssignSkillsetsAsync(id, dto.SkillsetIds);
-        await _repository.AssignHobbiesAsync(id, dto.HobbyIds);
+        if (dto.SkillsetIds != null)
+        {
+            await _repository.AssignSkillsetsAsync(id, dto.SkillsetIds);
+        }
+
+        
+        if (dto.HobbyIds != null)
+        {
+            await _repository.AssignHobbiesAsync(id, dto.HobbyIds);
+        }
 
         return await _repository.GetByIdAsync(id) ?? updatedFreelancer;
     }
+
 
     public async Task DeleteFreelancerAsync(int id,int userId, string userRole)
     {

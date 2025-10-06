@@ -187,39 +187,67 @@ public class FreelancerRepository : IFreelancerRepository
 
         try
         {
-            
-            await connection.ExecuteAsync(
-                "UPDATE Freelancers SET Username = @Username, Email = @Email, Phone = @Phone WHERE Id = @Id",
-                freelancer, transaction);
-
-            
-            await connection.ExecuteAsync(
-                "DELETE FROM FreelancerSkillsets WHERE FreelancerId = @Id",
+            var existing = await connection.QueryFirstOrDefaultAsync<Freelancer>(
+                "SELECT * FROM Freelancers WHERE Id = @Id",
                 new { Id = freelancer.Id }, transaction);
 
-            
-            await connection.ExecuteAsync(
-                "DELETE FROM FreelancerHobbies WHERE FreelancerId = @Id",
-                new { Id = freelancer.Id }, transaction);
+            if (existing == null)
+                throw new KeyNotFoundException("Freelancer not found.");
 
-            
-            foreach (var skill in freelancer.Skillsets)
+            var username = string.IsNullOrEmpty(freelancer.Username) ? existing.Username : freelancer.Username;
+            var email = string.IsNullOrEmpty(freelancer.Email) ? existing.Email : freelancer.Email;
+            var phone = string.IsNullOrEmpty(freelancer.Phone) ? existing.Phone : freelancer.Phone;
+
+            if (!string.IsNullOrEmpty(freelancer.Email))
             {
-                await connection.ExecuteAsync(
-                    "INSERT INTO FreelancerSkillsets (FreelancerId, SkillsetOptionId) VALUES (@FreelancerId, @SkillsetOptionId)",
-                    new { FreelancerId = freelancer.Id, SkillsetOptionId = skill.Id }, transaction);
+                var emailExists = await connection.QuerySingleAsync<int>(
+                    "SELECT COUNT(1) FROM Freelancers WHERE Email = @Email AND Id <> @Id",
+                    new { Email = freelancer.Email, Id = freelancer.Id }, transaction);
+
+                if (emailExists > 0)
+                    throw new Exception("Email already exists for another freelancer.");
             }
 
-            
-            foreach (var hobby in freelancer.Hobbies)
+            await connection.ExecuteAsync(
+                "UPDATE Freelancers SET Username = @Username, Email = @Email, Phone = @Phone WHERE Id = @Id",
+                new { Username = username, Email = email, Phone = phone, Id = freelancer.Id },
+                transaction);
+
+            if (freelancer.Skillsets != null)
             {
                 await connection.ExecuteAsync(
-                    "INSERT INTO FreelancerHobbies (FreelancerId, HobbyOptionId) VALUES (@FreelancerId, @HobbyOptionId)",
-                    new { FreelancerId = freelancer.Id, HobbyOptionId = hobby.Id }, transaction);
+                    "DELETE FROM FreelancerSkillsets WHERE FreelancerId = @Id",
+                    new { Id = freelancer.Id }, transaction);
+
+                foreach (var skill in freelancer.Skillsets)
+                {
+                    await connection.ExecuteAsync(
+                        "INSERT INTO FreelancerSkillsets (FreelancerId, SkillsetOptionId) VALUES (@FreelancerId, @SkillsetOptionId)",
+                        new { FreelancerId = freelancer.Id, SkillsetOptionId = skill.Id }, transaction);
+                }
+            }
+
+            if (freelancer.Hobbies != null)
+            {
+                await connection.ExecuteAsync(
+                    "DELETE FROM FreelancerHobbies WHERE FreelancerId = @Id",
+                    new { Id = freelancer.Id }, transaction);
+
+                foreach (var hobby in freelancer.Hobbies)
+                {
+                    await connection.ExecuteAsync(
+                        "INSERT INTO FreelancerHobbies (FreelancerId, HobbyOptionId) VALUES (@FreelancerId, @HobbyOptionId)",
+                        new { FreelancerId = freelancer.Id, HobbyOptionId = hobby.Id }, transaction);
+                }
             }
 
             transaction.Commit();
-            return freelancer;
+
+            var updated = await connection.QuerySingleAsync<Freelancer>(
+                "SELECT * FROM Freelancers WHERE Id = @Id",
+                new { Id = freelancer.Id });
+
+            return updated;
         }
         catch
         {
@@ -227,6 +255,7 @@ public class FreelancerRepository : IFreelancerRepository
             throw;
         }
     }
+
 
 
     public async Task DeleteAsync(int id)
