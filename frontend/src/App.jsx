@@ -1,62 +1,46 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { freelancerApi } from './services/api';
 import FreelancerTable from './components/FreelancerTable';
 import FreelancerForm from './components/FreelancerForm';
+import Login from './pages/Login';
+import Register from './pages/Register';
 import styles from './styles/App.module.css';
 
-function App() {
+function Dashboard() {
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [page, setPage] = useState(1);
-  const pageSize = 10;
-
   const [currentView, setCurrentView] = useState('list');
   const [editingFreelancer, setEditingFreelancer] = useState(null);
-  
-  // Search state
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const pageSize = 10;
+
+  const navigate = useNavigate();
+  const role = localStorage.getItem('role');
 
   useEffect(() => {
-  loadFreelancers();
-}, [page, searchKeyword]);
-
+    loadFreelancers();
+  }, [page, searchKeyword]);
 
   const loadFreelancers = async () => {
-  setLoading(true);
-  try {
-    const response = await freelancerApi.getAll(page, pageSize, searchKeyword);
-    setFreelancers(response.data);
+    setLoading(true);
+    try {
+      const response = await freelancerApi.getAll(page, pageSize, searchKeyword);
+      setFreelancers(response.data);
 
-    if (searchKeyword.trim()) {
-      setIsSearching(true);
-      setPage(1); 
-    } else {
-      setIsSearching(false);
+      if (searchKeyword.trim()) {
+        setIsSearching(true);
+        setPage(1);
+      } else {
+        setIsSearching(false);
+      }
+    } catch (error) {
+      console.error('Error loading freelancers:', error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Error loading freelancers:', error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchKeyword(value);
-    
-    // If search is cleared, reload all freelancers
-    if (!value.trim()) {
-      setIsSearching(false);
-      setPage(1);
-    }
-  };
-
-  const handleClearSearch = () => {
-    setSearchKeyword('');
-    setIsSearching(false);
-    setPage(1);
   };
 
   const handleAddNew = () => {
@@ -87,14 +71,16 @@ function App() {
   const handleDelete = async (id) => {
     try {
       await freelancerApi.delete(id);
-      if (searchKeyword.trim()) {
-        await handleSearch();
-      } else {
-        await loadFreelancers();
-      }
+      await loadFreelancers();
     } catch (error) {
       console.error('Error deleting freelancer:', error);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    navigate('/login');
   };
 
   const handleCancel = () => {
@@ -104,26 +90,36 @@ function App() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Freelancer Management</h1>
-      
+      <div className={styles.navbar}>
+        <h1 className={styles.title}>Freelancer Management</h1>
+        <div>
+          <span style={{ marginRight: '15px' }}>Role: {role}</span>
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            Logout
+          </button>
+        </div>
+      </div>
+
       {currentView === 'list' && (
         <>
           <div className={styles.actionBar}>
-            <button onClick={handleAddNew} className={styles.addButton}>
-              ➕ Add New Freelancer
-            </button>
+            {role === 'Admin' && (
+              <button onClick={handleAddNew} className={styles.addButton}>
+                ➕ Add New Freelancer
+              </button>
+            )}
 
             <div className={styles.searchContainer}>
               <input
                 type="text"
                 placeholder="Search freelancers..."
                 value={searchKeyword}
-                onChange={handleSearchChange}
+                onChange={(e) => setSearchKeyword(e.target.value)}
                 className={styles.searchInput}
               />
               {searchKeyword && (
-                <button 
-                  onClick={handleClearSearch}
+                <button
+                  onClick={() => setSearchKeyword('')}
                   className={styles.clearButton}
                   title="Clear search"
                 >
@@ -133,39 +129,28 @@ function App() {
             </div>
           </div>
 
-          {isSearching && searchKeyword && (
-            <div className={styles.searchIndicator}>
-              Showing results for: "<strong>{searchKeyword}</strong>"
-            </div>
-          )}
-
           {loading ? (
-            <div style={{ textAlign: 'center', color: '#ff6b35', fontSize: '18px' }}>
-              Loading...
-            </div>
+            <div style={{ textAlign: 'center', color: '#ff6b35', fontSize: '18px' }}>Loading...</div>
           ) : (
             <>
-              <FreelancerTable 
+              <FreelancerTable
                 freelancers={freelancers}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
+                onEdit={role === 'Admin' ? handleEdit : undefined}
+                onDelete={role === 'Admin' ? handleDelete : undefined}
               />
 
-              {/* Show pagination only when not searching */}
               {!isSearching && (
                 <div className={styles.pagination}>
-                  <button 
-                    onClick={() => setPage((p) => Math.max(p - 1, 1))} 
+                  <button
+                    onClick={() => setPage((p) => Math.max(p - 1, 1))}
                     disabled={page === 1}
                     className={styles.pageButton}
                   >
                     ← Previous
                   </button>
-
                   <span className={styles.pageInfo}>Page {page}</span>
-
-                  <button 
-                    onClick={() => setPage((p) => p + 1)} 
+                  <button
+                    onClick={() => setPage((p) => p + 1)}
                     disabled={freelancers.length < pageSize}
                     className={styles.pageButton}
                   >
@@ -173,29 +158,44 @@ function App() {
                   </button>
                 </div>
               )}
-
-              {/* Show message when no results found */}
-              {freelancers.length === 0 && !loading && (
-                <div className={styles.noResults}>
-                  {isSearching ? 
-                    `No freelancers found matching "${searchKeyword}"` : 
-                    'No freelancers found'
-                  }
-                </div>
-              )}
             </>
           )}
         </>
       )}
-      
+
       {currentView === 'form' && (
-        <FreelancerForm 
+        <FreelancerForm
           freelancer={editingFreelancer}
           onSave={handleSave}
           onCancel={handleCancel}
         />
       )}
     </div>
+  );
+}
+
+function App() {
+  const [role, setRole] = useState(localStorage.getItem('role') || null);
+
+  return (
+    <Router>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            role ? <Navigate to="/dashboard" /> : <Login onLoginSuccess={setRole} />
+          }
+        />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            role ? <Dashboard /> : <Navigate to="/login" />
+          }
+        />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+      </Routes>
+    </Router>
   );
 }
 

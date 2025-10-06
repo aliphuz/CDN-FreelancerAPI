@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "JWTToken_Auth_API",
+        Title = "CDN_Freelancer",
         Version = "v1"
     });
 
@@ -78,6 +78,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IUserRepository>(provider => new UserRepository(connectionString));
 
+builder.Services.AddScoped<IHobbyRepository>(provider => new HobbyRepository(connectionString));
+builder.Services.AddScoped<HobbyService>();
+
+builder.Services.AddScoped<ISkillRepository>(provider => new SkillRepository(connectionString));
+builder.Services.AddScoped<SkillService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

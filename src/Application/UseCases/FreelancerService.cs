@@ -15,13 +15,23 @@ public class FreelancerService
 
     public async Task<Freelancer> CreateFreelancerAsync(CreateFreelancerDto dto)
     {
+
         if (await _repository.IsEmailExistAsync(dto.Email))
             throw new Exception("Email already exists.");
+
+        var existingFreelancer = await _repository.GetByUserIdAsync(dto.UserId);
+        if (existingFreelancer != null)
+        {
+            throw new InvalidOperationException("Each user only have one freelancer profile");
+        }
+
         var freelancer = new Freelancer
         {
             Username = dto.Username,
             Email = dto.Email,
             Phone = dto.Phone,
+            UserId = dto.UserId,
+            IsArchived = false
         };
         var createdFreelancer = await _repository.CreateAsync(freelancer);
 
@@ -56,15 +66,18 @@ public class FreelancerService
 
   
 
-    public async Task<Freelancer> UpdateFreelancerAsync(int id, UpdateFreelancerDto dto)
+    public async Task<Freelancer> UpdateFreelancerAsync(int id, UpdateFreelancerDto dto, int userId, string userRole)
     {
-        var freelancer = new Freelancer
-        {
-            Id = id,
-            Username = dto.Username,
-            Email = dto.Email,
-            Phone = dto.Phone,
-        };
+        var freelancer = await _repository.GetByIdAsync(id)
+        ?? throw new KeyNotFoundException("Freelancer not found.");
+
+        if (userRole == "User" && freelancer.UserId != userId)
+            throw new UnauthorizedAccessException("You can only update your own freelancer profile.");
+
+        freelancer.Username = dto.Username ?? freelancer.Username;
+        freelancer.Email = dto.Email ?? freelancer.Email;
+        freelancer.Phone = dto.Phone ?? freelancer.Phone;
+
         var updatedFreelancer = await _repository.UpdateAsync(freelancer);
 
         
@@ -74,14 +87,30 @@ public class FreelancerService
         return await _repository.GetByIdAsync(id) ?? updatedFreelancer;
     }
 
-    public async Task DeleteFreelancerAsync(int id)
+    public async Task DeleteFreelancerAsync(int id,int userId, string userRole)
     {
+        var freelancer = await _repository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException("Freelancer not found.");
+
+        if (userRole == "User" && freelancer.UserId != userId)
+            throw new UnauthorizedAccessException("You can only delete your own freelancer profile.");
         await _repository.DeleteAsync(id);
     }
 
 
-    public async Task ArchiveFreelancerAsync(int id, bool archive)
+    public async Task ArchiveFreelancerAsync(int id, bool archive, int userId, string userRole)
     {
+        var freelancer = await _repository.GetByIdAsync(id)
+            ?? throw new KeyNotFoundException("Freelancer not found.");
+
+        if (userRole == "User" && freelancer.UserId != userId)
+            throw new UnauthorizedAccessException("You can only archive your own freelancer profile.");
+
         await _repository.ArchiveAsync(id, archive);
+    }
+    public async Task<bool> IsOwnerAsync(int freelancerId, int userId)
+    {
+        var freelancer = await _repository.GetByIdAsync(freelancerId);
+        return freelancer != null && freelancer.UserId == userId;
     }
 }

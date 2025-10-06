@@ -17,4 +17,6 @@ public interface IFreelancerRepository
     Task<IEnumerable<SkillsetOptions>> GetSkillOptionsAsync();
     Task<IEnumerable<HobbyOptions>> GetHobbyOptionsAsync();
     Task<bool> IsEmailExistAsync(string email);
+
+    Task<Freelancer?> GetByUserIdAsync (int  userId);
 }

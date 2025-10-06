@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { configs } from 'eslint-plugin-react-refresh';
 
 const API_BASE_URL = 'https://localhost:60300/api';
 
@@ -8,6 +9,21 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+api.interceptors.response.use((configs) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    configs.headers.Authorization = `Bearer ${token}`;
+  }
+  return configs;
+});
+
+export const authApi = {
+  register: (data) => 
+    api.post('/Auth/register', data),
+  login: (data) => 
+    api.post('/Auth/login', data),
+};
 
 export const freelancerApi = {
   getAll: (page = 1, pageSize = 10, search = null) => {
@@ -25,7 +41,7 @@ export const freelancerApi = {
     api.post('/freelancers', freelancer),
   
   update: (id, freelancer) => 
-    api.put(`/freelancers/${id}`, freelancer),
+    api.patch(`/freelancers/${id}`, freelancer),
   
   delete: (id) => 
     api.delete(`/freelancers/${id}`),

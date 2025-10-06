@@ -6,6 +6,8 @@ public class Freelancer
     public string Phone { get; set; } = string.Empty;
     public bool IsArchived { get; set; }
 
+    public int UserId { get; set; }
+
     public List<HobbyOptions> Hobbies { get; set; } = new();
     public List<SkillsetOptions> Skillsets { get; set; } = new();
 }

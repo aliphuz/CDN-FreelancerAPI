@@ -26,7 +26,7 @@ public class FreelancerRepository : IFreelancerRepository
         try
         {
             var freelancerId = await connection.QuerySingleAsync<int>(
-                "INSERT INTO Freelancers (Username, Email, Phone, IsArchived) OUTPUT INSERTED.Id VALUES (@Username, @Email, @Phone, @IsArchived)",
+                "INSERT INTO Freelancers (UserId, Username, Email, Phone, IsArchived) OUTPUT INSERTED.Id VALUES (@UserID, @Username, @Email, @Phone, @IsArchived)",
                 freelancer, transaction);
 
             freelancer.Id = freelancerId;
@@ -54,6 +54,14 @@ public class FreelancerRepository : IFreelancerRepository
             transaction.Rollback();
             throw;
         }
+    }
+    public async Task<Freelancer?> GetByUserIdAsync(int userId)
+    {
+        using var connectionn = new SqlConnection(_connectionString);
+        await connectionn.OpenAsync();
+
+        return await connectionn.QuerySingleOrDefaultAsync<Freelancer>(
+            "SELECT * FROM Freelancers WHERE UserID = @UserId", new { UserId = userId });
     }
 
     public async Task<bool> IsEmailExistAsync(string email)
