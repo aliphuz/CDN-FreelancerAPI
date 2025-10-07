@@ -1,10 +1,12 @@
 import{useState} from 'react';
 import { authApi } from '../services/api';
 import styles from '../styles/Login.module.css';
+import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onLoginSuccess }) => {
     const [form,setForm] = useState({email:'',password:''});
     const [error,seterror] = useState(null);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -13,7 +15,9 @@ const Login = ({ onLoginSuccess }) => {
             const res = await authApi.login(form);
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('role', res.data.role);
+            localStorage.setItem("userId", res.data.userId);
             onLoginSuccess(res.data.role);
+            navigate('/');
         }catch(err) {
             seterror(err.response?.data?.message || 'Login failed');
         }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { freelancerApi } from '../services/api';
 import styles from '../styles/FreelancerForm.module.css';
+import { freelancerApi } from '../services/api';
 
-const FreelancerForm = ({ freelancer, onCancel }) => {
+const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -12,20 +12,30 @@ const FreelancerForm = ({ freelancer, onCancel }) => {
   });
 
   const [options, setOptions] = useState({ skillsets: [], hobbies: [] });
-  const [message, setMessage] = useState(null); // for backend errors / success
+  const [message, setMessage] = useState(null);
 
-  // Load skill and hobby options
+  // Load hobbies & skills
   useEffect(() => {
-    const loadOptions = async () => {
-      try {
-        const res = await freelancerApi.getOptions();
-        setOptions(res.data);
-      } catch (err) {
-        console.error("Error loading options:", err);
-      }
-    };
-    loadOptions();
-  }, []);
+  const loadHobbyAndSkills = async () => {
+    try {
+      const [hobbyRes, skillRes] = await Promise.all([
+        freelancerApi.getHobby(),
+        freelancerApi.getSkillset()
+      ]);
+
+      setOptions({
+        hobbies: hobbyRes.data,
+        skillsets: skillRes.data
+      });
+    } catch (error) {
+      console.error('Error loading options:', error);
+    }
+  };
+
+  loadHobbyAndSkills();
+}, []);
+
+
 
   // Populate form if editing
   useEffect(() => {
@@ -37,10 +47,18 @@ const FreelancerForm = ({ freelancer, onCancel }) => {
         skillsetIds: freelancer.skillsets?.map(s => s.id) || [],
         hobbyIds: freelancer.hobbies?.map(h => h.id) || []
       });
+    } else {
+      setFormData({
+        username: '',
+        email: '',
+        phone: '',
+        skillsetIds: [],
+        hobbyIds: []
+      });
     }
   }, [freelancer]);
 
-  // Toggle skills/hobbies selection
+  // Toggle checkbox selection
   const toggleSelection = (id, listName) => {
     setFormData(prev => {
       const list = prev[listName];
@@ -53,30 +71,18 @@ const FreelancerForm = ({ freelancer, onCancel }) => {
     });
   };
 
-  // Submit handler
+  // Submit handler (delegate to parent)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(null);
 
     try {
-      if (freelancer) {
-        // Update existing
-        await freelancerApi.update(freelancer.id, formData);
-        alert('Updated successfully!');
-      } else {
-        // Create new
-        await freelancerApi.create(formData);
-        alert('Saved successfully!');
-      }
-      onCancel(); // Close form only on success
+      await onSave(formData); 
     } catch (err) {
       console.error('Error saving freelancer:', err);
-
-      // Backend custom error (like duplicate email)
       if (err.response?.data?.details) {
         setMessage(err.response.data.details);
       } else if (err.response?.data?.errors) {
-        // FluentValidation errors
         const apiErrors = err.response.data.errors;
         const firstError = apiErrors.Username?.[0] || apiErrors.Email?.[0] || apiErrors.Phone?.[0];
         setMessage(firstError || 'Something went wrong.');
@@ -99,7 +105,6 @@ const FreelancerForm = ({ freelancer, onCancel }) => {
         <label className={styles.label}>Username:</label>
         <input
           type="text"
-          name="username"
           value={formData.username}
           onChange={(e) => setFormData({ ...formData, username: e.target.value })}
           required
@@ -112,7 +117,6 @@ const FreelancerForm = ({ freelancer, onCancel }) => {
         <label className={styles.label}>Email:</label>
         <input
           type="email"
-          name="email"
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           required
@@ -125,7 +129,6 @@ const FreelancerForm = ({ freelancer, onCancel }) => {
         <label className={styles.label}>Phone:</label>
         <input
           type="text"
-          name="phone"
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           required

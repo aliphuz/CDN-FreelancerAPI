@@ -1,23 +1,30 @@
 import {useState} from 'react';
 import { authApi } from '../services/api';
 import styles from '../styles/Register.module.css';
+import { useNavigate } from 'react-router-dom';
 
 
 const Register = ({ onRegisterSuccess }) => {
     const [form,setForm] = useState({username:'',email:'',password:'',role:'User'});
     const [message,setMessage] = useState('');
-
+    const navigate = useNavigate();
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         try {
-            await authApi.register(form);
-            alert('Registered successfully!');
+          const res = await authApi.register(form);
+          setMessage('Registration successful! You can now log in.');
+          setForm({username:'',email:'',password:'',role:'User'});
+          if(typeof onRegisterSuccess === 'function') {
             onRegisterSuccess();
+          }
+           navigate('/Login');
         }catch(err) {
-            setMessage(err.response?.data?.message || 'Registration failed');
+          setMessage(err.response?.data?.message || 'Registration failed');
         }
-    };
+      };
+    
+
 
     return (
     <div className={styles.container}>
@@ -61,18 +68,6 @@ const Register = ({ onRegisterSuccess }) => {
             required
             className={styles.input}
           />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label className={styles.label}>Role:</label>
-          <select
-            value={form.role}
-            onChange={(e) => setForm({ ...form, role: e.target.value })}
-            className={styles.select}
-          >
-            <option value="User">User</option>
-            <option value="Admin">Admin</option>
-          </select>
         </div>
 
         <button type="submit" className={styles.button}>Register</button>

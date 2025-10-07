@@ -77,6 +77,7 @@
   margin: 24px 0;
 }
 
+
 .pageButton {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -108,3 +109,4 @@
   color: #333;
   font-size: 16px;
 }
+

@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState,useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { freelancerApi } from './services/api';
 import FreelancerTable from './components/FreelancerTable';
 import FreelancerForm from './components/FreelancerForm';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import styles from './styles/App.module.css';
+import { freelancerApi } from './services/api';
 
-function Dashboard() {
+
+
+function Dashboard({ setRole }) {
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -16,31 +18,40 @@ function Dashboard() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const pageSize = 10;
-
   const navigate = useNavigate();
   const role = localStorage.getItem('role');
+  const userId = localStorage.getItem('userId');
+  const [hasFreelancer, setHasFreelancer] = useState(false);
+
+
+  const loadFreelancers = async () => {
+    setLoading(true);
+     try {
+    const response = await freelancerApi.getAll(page, pageSize, searchKeyword);
+    setFreelancers(response.data);
+
+   
+    const userHasFreelancer = response.data.some(f => f.userId === Number(userId));
+    setHasFreelancer(userHasFreelancer);
+
+    setIsSearching(!!searchKeyword.trim());
+    if (searchKeyword.trim()) setPage(1);
+  } catch (error) {
+    console.error('Error loading freelancers:', error);
+  } finally {
+    setLoading(false);
+  }
+  };
 
   useEffect(() => {
     loadFreelancers();
   }, [page, searchKeyword]);
 
-  const loadFreelancers = async () => {
-    setLoading(true);
-    try {
-      const response = await freelancerApi.getAll(page, pageSize, searchKeyword);
-      setFreelancers(response.data);
-
-      if (searchKeyword.trim()) {
-        setIsSearching(true);
-        setPage(1);
-      } else {
-        setIsSearching(false);
-      }
-    } catch (error) {
-      console.error('Error loading freelancers:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    setRole(null);
+    navigate('/login');
   };
 
   const handleAddNew = () => {
@@ -56,9 +67,9 @@ function Dashboard() {
   const handleSave = async (freelancerData) => {
     try {
       if (editingFreelancer) {
-        await freelancerApi.update(editingFreelancer.id, freelancerData);
+        await freelancerApi.update(editingFreelancer.id, freelancerData); // PATCH
       } else {
-        await freelancerApi.create(freelancerData);
+        await freelancerApi.create(freelancerData); // POST
       }
       await loadFreelancers();
       setCurrentView('list');
@@ -69,23 +80,29 @@ function Dashboard() {
   };
 
   const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this freelancer?')) return;
     try {
       await freelancerApi.delete(id);
       await loadFreelancers();
     } catch (error) {
       console.error('Error deleting freelancer:', error);
+      alert('Failed to delete freelancer.');
     }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    navigate('/login');
   };
 
   const handleCancel = () => {
     setCurrentView('list');
     setEditingFreelancer(null);
+  };
+
+  const handleArchive = async (id, isArchived) => {
+    try {
+      await freelancerApi.archive(id, isArchived);
+      await loadFreelancers();
+    } catch (error) {
+      console.error('Error archiving:', error);
+      alert('You can only archive your Freelancer Account.');
+    }
   };
 
   return (
@@ -94,19 +111,22 @@ function Dashboard() {
         <h1 className={styles.title}>Freelancer Management</h1>
         <div>
           <span style={{ marginRight: '15px' }}>Role: {role}</span>
-          <button onClick={handleLogout} className={styles.logoutButton}>
-            Logout
-          </button>
+          <button onClick={handleLogout} className={styles.logoutButton}>Logout</button>
         </div>
       </div>
 
       {currentView === 'list' && (
         <>
           <div className={styles.actionBar}>
-            {role === 'Admin' && (
+            {role === 'User' && !hasFreelancer && (
               <button onClick={handleAddNew} className={styles.addButton}>
                 ➕ Add New Freelancer
               </button>
+            )}
+            {role === 'Admin' && (
+             <button onClick={handleAddNew} className={styles.addButton}>
+               ➕ Add New Freelancer
+             </button>
             )}
 
             <div className={styles.searchContainer}>
@@ -121,7 +141,6 @@ function Dashboard() {
                 <button
                   onClick={() => setSearchKeyword('')}
                   className={styles.clearButton}
-                  title="Clear search"
                 >
                   ✕
                 </button>
@@ -130,13 +149,18 @@ function Dashboard() {
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', color: '#ff6b35', fontSize: '18px' }}>Loading...</div>
+            <div style={{ textAlign: 'center', color: '#ff6b35', fontSize: '18px' }}>
+              Loading...
+            </div>
           ) : (
             <>
               <FreelancerTable
                 freelancers={freelancers}
-                onEdit={role === 'Admin' ? handleEdit : undefined}
-                onDelete={role === 'Admin' ? handleDelete : undefined}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onArchive={handleArchive}
+                userId={userId}
+                role={role}
               />
 
               {!isSearching && (
@@ -174,26 +198,28 @@ function Dashboard() {
   );
 }
 
+
+// -------------------- App Root --------------------
 function App() {
   const [role, setRole] = useState(localStorage.getItem('role') || null);
 
   return (
     <Router>
       <Routes>
-        <Route
-          path="/login"
-          element={
-            role ? <Navigate to="/dashboard" /> : <Login onLoginSuccess={setRole} />
-          }
-        />
+        <Route path="/login" element={<Login onLoginSuccess={setRole} />} />
         <Route path="/register" element={<Register />} />
+
+        
         <Route
-          path="/dashboard"
+          path="/"
           element={
-            role ? <Dashboard /> : <Navigate to="/login" />
+            localStorage.getItem('token') ? (
+              <Dashboard setRole={setRole} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
-        <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
   );

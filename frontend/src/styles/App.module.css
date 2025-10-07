@@ -1,4 +1,4 @@
-/* Root and Global Styles */
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -14,7 +14,7 @@
   color: #888;
 }
 
-/* Logo Styles */
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -45,7 +45,7 @@
   }
 }
 
-/* Main Container - Dark Theme */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -55,7 +55,6 @@
   color: white;
 }
 
-/* Title */
 .title {
   text-align: center;
   color: #ff6b35;
@@ -64,7 +63,7 @@
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
 }
 
-/* Action Bar */
+
 .actionBar {
   display: flex;
   justify-content: space-between;
@@ -74,7 +73,7 @@
   flex-wrap: wrap;
 }
 
-/* Add Button */
+
 .addButton {
   background-color: #ff6b35;
   color: white;
@@ -92,7 +91,7 @@
   background-color: #e55a2b;
 }
 
-/* Search Container */
+
 .searchContainer {
   position: relative;
   display: flex;
@@ -100,7 +99,18 @@
   flex: 1;
   max-width: 400px;
 }
-
+.logoutButton {
+  background-color: #ff6b35;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s ease;
+  margin-bottom: 15px;
+  
+}
 .searchInput {
   width: 100%;
   padding: 10px 40px 10px 16px;
@@ -111,6 +121,8 @@
   transition: all 0.3s ease;
   background: #2a2a2a;
   color: white;
+  
+
 }
 
 .searchInput:focus {

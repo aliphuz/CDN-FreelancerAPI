@@ -58,3 +58,11 @@
 .deleteButton:hover {
   background-color: #c82333;
 }
+.archiveButton {
+  background-color: #ffc107;
+  color: black;
+}
+
+.archiveButton:hover {
+  background-color: #e0a800;
+}

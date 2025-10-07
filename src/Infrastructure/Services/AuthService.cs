@@ -59,7 +59,8 @@ namespace CDN.FreelancerAPI.Infrastructure.Services
                 Token = token,
                 Username = user.username,
                 Role = user.Role,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                userId = user.Id
             };
         }
 
