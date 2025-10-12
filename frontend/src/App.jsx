@@ -120,7 +120,7 @@ function Dashboard({ setRole }) {
           <div className={styles.actionBar}>
             {role === 'User' && !hasFreelancer && (
               <button onClick={handleAddNew} className={styles.addButton}>
-                ➕ Add New Freelancer
+                ➕ Create New Freelancer
               </button>
             )}
             {role === 'Admin' && (

@@ -34,10 +34,10 @@ namespace CDN.FreelancerAPI.Infrastructure.Repositories
         public async Task AddAsync(Hobby hobby)
         {
             using var conn = new SqlConnection(_connectionString);
-            const string sql = "INSERT INTO HobbyOptions (HobbyName) VALUES (@HobbyName)";
-            await conn.ExecuteAsync(sql, new { HobbyName = hobby.HobbyName.Trim() });
+            const string sql = "INSERT INTO HobbyOptions (HobbyName, HobbyDescription) VALUES (@HobbyName, @HobbyDescription)";
+            await conn.ExecuteAsync(sql, new {HobbyName = hobby.HobbyName.Trim(), HobbyDescription = hobby.HobbyDescription.Trim() });
         }
-
+   
         public async Task DeleteAsync(int id)
         {
             using var conn = new SqlConnection(_connectionString);

@@ -24,14 +24,14 @@ namespace CDN.FreelancerAPI.Application.UseCases
         public async Task<Hobby> CreateHobbyAsync(CreateHobbyDto dto)
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.Name))
-                throw new ArgumentException("Hobby name is required");
+                throw new ArgumentException("Hobby name or description is required");
 
             
             var existing = await _repo.GetByNameAsync(dto.Name.Trim());
             if (existing != null)
                 throw new InvalidOperationException("Hobby already exists");
 
-            var hobby = new Hobby { HobbyName = dto.Name.Trim() };
+            var hobby = new Hobby { HobbyName = dto.Name.Trim(), HobbyDescription = dto.HobbyDescription.Trim() };
             await _repo.AddAsync(hobby);
 
             return hobby;
