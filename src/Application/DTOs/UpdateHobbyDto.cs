@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace CDN.FreelancerAPI.Application.DTOs
 {
-    public class CreateSkillDto
+    public class UpdateHobbyDto
     {
-        public string Name { get; set; } = string.Empty;
-
-        public string SkillDescription { get; set; } = string.Empty;
+        public string? Name { get; set; } = string.Empty;
+        public string? HobbyDescription { get; set; } = string.Empty;
     }
 }

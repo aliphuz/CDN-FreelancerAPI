@@ -25,14 +25,14 @@ namespace CDN.FreelancerAPI.Application.UseCases
         public async Task<Skillset> CreateSkillAsync(CreateSkillDto dto)
         {
             if (dto == null || string.IsNullOrWhiteSpace(dto.Name))
-                throw new ArgumentException("Skill name is required");
+                throw new ArgumentException("Skill name or Description is required");
 
 
             var existing = await _skillRepository.GetByNameAsync(dto.Name.Trim());
             if (existing != null)
                 throw new InvalidOperationException("Skill already exists");
 
-            var skill = new Skillset { SkillName = dto.Name.Trim() };
+            var skill = new Skillset { SkillName = dto.Name.Trim(), SkillDescription = dto.SkillDescription.Trim() };
             await _skillRepository.AddAsync(skill);
 
             return skill;
@@ -40,6 +40,23 @@ namespace CDN.FreelancerAPI.Application.UseCases
         public async Task DeleteSkill(int id)
         {
             await _skillRepository.DeleteAsync(id);
+        }
+
+        public async Task<Skillset?> UpdateSkillsetAsync(int id, UpdateSkillsetDto dto)
+        {
+            var skill = await _skillRepository.GetByIdAsync(id);
+            if(skill == null) return null;
+
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+            {
+                skill.SkillName = dto.Name.Trim();
+            }
+            if (!string.IsNullOrEmpty(dto.SkillDescription))
+            {
+                skill.SkillDescription = dto.SkillDescription.Trim();
+            }
+            await _skillRepository.UpdateAsync(skill);
+            return skill;
         }
     }
 }

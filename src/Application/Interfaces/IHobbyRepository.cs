@@ -1,4 +1,5 @@
-﻿using CDN.FreelancerAPI.Domain.Entities;
+﻿using CDN.FreelancerAPI.Application.DTOs;
+using CDN.FreelancerAPI.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,9 @@ namespace CDN.FreelancerAPI.Application.Interfaces
         Task<Hobby?> GetByNameAsync(string name);
         Task AddAsync(Hobby hobby);
         Task DeleteAsync(int id);
+
+        Task UpdateAsync (Hobby hobby);
+        Task<Hobby?> GetByIdAsync(int id);
 
     }
 }

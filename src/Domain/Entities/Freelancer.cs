@@ -16,10 +16,13 @@ public class HobbyOptions
 {
     public int Id { get; set; }
     public string HobbyName { get; set; } = string.Empty;
+    public string HobbyDescription { get; set; } = string.Empty;
 }
 
 public class SkillsetOptions
 {
     public int Id { get; set; }
     public string SkillName { get; set; } = string.Empty;
+
+    public string SkillDescription { get; set; } = string.Empty;
 }

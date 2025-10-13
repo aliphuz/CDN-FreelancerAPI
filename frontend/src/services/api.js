@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { data } from 'react-router-dom';
 
 
 const API_BASE_URL = 'https://localhost:60300/api';
@@ -55,9 +56,33 @@ export const freelancerApi = {
   archive: (id, isArchived) => 
     api.patch(`/freelancers/${id}/archive`, { isArchived }),
 
+ 
+
+};
+
+ export const hobbyApi = {
  getHobby: () => 
   api.get('/Hobby'), 
 
-  getSkillset: () =>
+ CreateHobby : (data) =>
+  api.post('/Hobby',data),
+
+ DeleteHobby : (id) =>
+  api.delete(`/Hobby/${id}`),
+
+ updateHobby : (id, data) =>
+  api.patch(`/Hobby/${id}`, data),
+};
+
+export const skillsetApi = {
+  getSkillset: () => 
     api.get('/Skill'),
+  
+  create: (data) => 
+    api.post('/Skill', data),
+  
+  delete: (id) => 
+    api.delete(`/Skill/${id}`),
+  update: (id, data) =>
+    api.patch(`/Skill/${id}`, data),
 };

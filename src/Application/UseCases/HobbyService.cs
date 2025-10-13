@@ -41,5 +41,23 @@ namespace CDN.FreelancerAPI.Application.UseCases
         {
             await _repo.DeleteAsync(id);
         }
+
+        public async Task <Hobby?> UpdateHobbyAsync(int id, UpdateHobbyDto dto)
+        {
+            var hobby = await _repo.GetByIdAsync(id);
+            if (hobby == null) return null;
+
+            if (!string.IsNullOrEmpty(dto.Name))
+            {
+                hobby.HobbyName = dto.Name.Trim();
+            }
+            if (!string.IsNullOrEmpty(dto.HobbyDescription))
+            {
+                hobby.HobbyDescription = dto.HobbyDescription.Trim();
+            }
+            await _repo.UpdateAsync(hobby);
+            return hobby;
+
+        }
     }
 }

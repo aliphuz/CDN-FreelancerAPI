@@ -1,4 +1,5 @@
-﻿using CDN.FreelancerAPI.Application.Interfaces;
+﻿using CDN.FreelancerAPI.Application.DTOs;
+using CDN.FreelancerAPI.Application.Interfaces;
 using CDN.FreelancerAPI.Domain.Entities;
 using Dapper;
 using Microsoft.Data.SqlClient;
@@ -21,7 +22,7 @@ namespace CDN.FreelancerAPI.Infrastructure.Repositories
         public async Task<IEnumerable<Hobby>> GetAllAsync()
         {
             using var conn = new SqlConnection(_connectionString);
-            const string sql = "SELECT Id, HobbyName FROM HobbyOptions ORDER BY HobbyName";
+            const string sql = "SELECT Id, HobbyName, HobbyDescription FROM HobbyOptions ORDER BY HobbyName";
             return await conn.QueryAsync<Hobby>(sql);
         }
         public async Task<Hobby?> GetByNameAsync(string hobbyName)
@@ -55,6 +56,20 @@ namespace CDN.FreelancerAPI.Infrastructure.Repositories
                 transaction.Rollback();
                 throw;
             }
-        } 
+        }
+        public async Task<Hobby?> GetByIdAsync(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            var query = "SELECT * FROM HobbyOptions WHERE Id = @Id";
+            return await connection.QueryFirstOrDefaultAsync<Hobby>(query, new { Id = id });
+        }
+
+        public async Task UpdateAsync(Hobby hobby) 
+        {
+        
+            using var connection = new SqlConnection(_connectionString);
+            var query = "UPDATE HobbyOptions SET HobbyName = @HobbyName, HobbyDescription = @HobbyDescription WHERE Id =@Id";
+            await connection.ExecuteAsync(query, hobby);
+        }
     }
 }

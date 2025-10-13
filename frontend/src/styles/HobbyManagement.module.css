@@ -1,0 +1,151 @@
+.container {
+  padding: 20px;
+  color: white;
+  background-color: #1e1e1e;
+  min-height: 100vh;
+}
+
+h2 {
+  margin-bottom: 20px;
+  color: #ff6b35;
+}
+
+.form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.form input {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  outline: none;
+}
+
+.form button {
+  background-color: #ff6b35;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  border-bottom: 1px solid #333;
+}
+
+.deleteButton {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+    margin-left: 10px;
+}
+
+.notAllowed {
+  color: #ff6b35;
+  font-size: 20px;
+  text-align: center;
+  margin-top: 100px;
+}
+.updateButton {
+  background-color: #ffc107;
+  color: black;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  
+}
+.table th,
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #333;
+  text-align: left; /* Ensures all text starts from the same side */
+  vertical-align: middle; /* Centers content vertically */
+  white-space: nowrap; /* Prevents text from breaking into new lines */
+}
+
+.table th {
+  background-color: #2c2c2c;
+  color: #ff6b35;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.table tr:hover {
+  background-color: #292929;
+  transition: 0.2s;
+}
+/* Modal overlay */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal box */
+.modal {
+  background: #2a2a2a;
+  padding: 25px;
+  border-radius: 10px;
+  width: 400px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  color: white;
+}
+
+.modal h3 {
+  color: #ff6b35;
+  margin-bottom: 15px;
+}
+
+.modal input,
+.modal textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #1e1e1e;
+  color: white;
+  resize: none;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.saveButton {
+  background: #28a745;
+  border: none;
+  padding: 8px 14px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancelButton {
+  background: #6c757d;
+  border: none;
+  padding: 8px 14px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}

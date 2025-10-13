@@ -46,5 +46,17 @@ namespace CDN.FreelancerAPI.WebAPI.Controllers
             return NoContent();
         }
 
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchSkill (int id, [FromBody]UpdateSkillsetDto dto)
+        {
+            var updated = await _service.UpdateSkillsetAsync(id, dto);
+            if(updated == null)
+            {
+                return NotFound(new { message = "Skill Not found" });
+
+            }
+            return Ok(updated);
+        }
+
     }
 }

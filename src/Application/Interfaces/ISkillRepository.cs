@@ -13,5 +13,8 @@ namespace CDN.FreelancerAPI.Application.Interfaces
         Task<Skillset?> GetByNameAsync(string name);
         Task AddAsync(Skillset skillset);
         Task DeleteAsync(int id);
+
+        Task UpdateAsync(Skillset skillset);
+        Task<Skillset?> GetByIdAsync(int id);
     }
 }

@@ -159,14 +159,14 @@ public class FreelancerRepository : IFreelancerRepository
         foreach (var freelancer in freelancers)
         {
             var skillsets = await connection.QueryAsync<SkillsetOptions>(
-            @"SELECT so.Id, so.SkillName
+            @"SELECT so.Id, so.SkillName, so.SkillDescription
               FROM FreelancerSkillsets fs
               INNER JOIN SkillsetOptions so ON fs.SkillsetOptionId = so.Id
               WHERE fs.FreelancerId = @Id",
             new { Id = freelancer.Id });
             freelancer.Skillsets = skillsets.ToList();
             var hobbies = await connection.QueryAsync<HobbyOptions>(
-             @"SELECT ho.Id, ho.HobbyName
+             @"SELECT ho.Id, ho.HobbyName, ho.HobbyDescription
               FROM FreelancerHobbies fh
               INNER JOIN HobbyOptions ho ON fh.HobbyOptionId = ho.Id
               WHERE fh.FreelancerId = @Id",

@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import styles from './styles/App.module.css';
 import { freelancerApi } from './services/api';
+import HobbyManagement from './components/HobbyManagement';
+import SkillManagement from './components/SkillManagement';
 
 
 
@@ -123,11 +125,29 @@ function Dashboard({ setRole }) {
                 ➕ Create New Freelancer
               </button>
             )}
-            {role === 'Admin' && (
-             <button onClick={handleAddNew} className={styles.addButton}>
-               ➕ Add New Freelancer
-             </button>
-            )}
+           {role === 'Admin' && (
+              <div style={{ display: "flex", gap: "10px" }}>
+               <button onClick={handleAddNew} className={styles.addButton}>
+                 ➕ Add New Freelancer
+              </button>
+               <button
+               onClick={() => navigate('/hobbies')}
+              className={styles.addButton}
+              style={{ backgroundColor: '#28a745' }}
+            >
+            🧩 Manage Hobbies
+              </button>
+              <button
+               onClick={() => navigate('/skills')}
+              className={styles.addButton}
+              style={{ backgroundColor: '#17a2b8' }}
+            >
+            🎨 Manage Skills
+              </button>
+              </div>
+                
+              )}
+
 
             <div className={styles.searchContainer}>
               <input
@@ -219,6 +239,26 @@ function App() {
               <Navigate to="/login" replace />
             )
           }
+          />
+           <Route
+          path="/hobbies"
+          element={
+            localStorage.getItem('token') && localStorage.getItem('role') === 'Admin' ? (
+              <HobbyManagement />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+        path = "/skills"
+        element={
+          localStorage.getItem('token') && localStorage.getItem('role') === 'Admin' ? (
+            <SkillManagement />
+          ) : (
+            <Navigate to = "/" replace />
+          )
+        }
         />
       </Routes>
     </Router>

@@ -46,5 +46,16 @@ namespace CDN.FreelancerAPI.WebAPI.Controllers
             await _service.DeleteHobby(id);
             return NoContent();
         }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> PatchHobby(int id, [FromBody]UpdateHobbyDto dto)
+        {
+            var updated = await _service.UpdateHobbyAsync(id, dto);
+            if (updated == null)
+            {
+                return NotFound(new { message = "Hobby not found" });
+            }
+            return Ok(updated);
+        }
     }
 }
