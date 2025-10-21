@@ -69,9 +69,9 @@ function Dashboard({ setRole }) {
   const handleSave = async (freelancerData) => {
     try {
       if (editingFreelancer) {
-        await freelancerApi.update(editingFreelancer.id, freelancerData); // PATCH
+        await freelancerApi.update(editingFreelancer.id, freelancerData); 
       } else {
-        await freelancerApi.create(freelancerData); // POST
+        await freelancerApi.create(freelancerData); 
       }
       await loadFreelancers();
       setCurrentView('list');

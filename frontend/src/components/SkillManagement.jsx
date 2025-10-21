@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/HobbyManagement.module.css";
 import { skillsetApi } from "../services/api";
+import { useNavigate } from 'react-router-dom';
 
 const SkillManagement = () => {
   const [skills, setSkills] = useState([]);
   const [newSkill, setNewSkill] = useState({ name: "", skillDescription: "" });
   const role = localStorage.getItem("role");
   const [editingSkill, setEditingSkill] = useState(null); 
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadSkills();
@@ -20,6 +22,10 @@ const SkillManagement = () => {
       console.error("Error loading skills:", err);
     }
   };
+
+    const handleback = () => {
+    navigate('/');
+  }
 
   const handleCreate = async (e) => {
     e.preventDefault(); 
@@ -67,6 +73,7 @@ const SkillManagement = () => {
 
   return (
     <div className={styles.container}>
+        <button onClick={handleback} className={styles.backButton}>← Back to Dashboard</button>
       <h2>🎯 Skill Management</h2>
 
       <form className={styles.form} onSubmit={handleCreate}>

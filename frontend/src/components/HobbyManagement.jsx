@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/HobbyManagement.module.css";
 import { hobbyApi } from "../services/api";
+import { useNavigate } from 'react-router-dom';
+
 
 const HobbyManagement = () => {
   const [hobbies, setHobbies] = useState([]);
   const [newHobby, setNewHobby] = useState({ hobbyName: "", hobbyDescription: "" });
   const [editingHobby, setEditingHobby] = useState(null); // for modal
   const role = localStorage.getItem("role");
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     loadHobbies();
@@ -21,6 +25,9 @@ const HobbyManagement = () => {
     }
   };
 
+  const handleback = () => {
+    navigate('/');
+  }
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
@@ -67,6 +74,7 @@ const HobbyManagement = () => {
 
   return (
     <div className={styles.container}>
+        <button onClick={handleback} className={styles.backButton}>← Back to Dashboard</button>
       <h2>🎯 Hobby Management</h2>
 
       <form className={styles.form} onSubmit={handleCreate}>

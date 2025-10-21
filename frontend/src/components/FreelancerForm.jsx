@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/FreelancerForm.module.css';
 import { freelancerApi } from '../services/api';
+import { hobbyApi}   from '../services/api';
+import { skillsetApi } from '../services/api';
 
 const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -14,13 +16,13 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
   const [options, setOptions] = useState({ skillsets: [], hobbies: [] });
   const [message, setMessage] = useState(null);
 
-  // Load hobbies & skills
+
   useEffect(() => {
   const loadHobbyAndSkills = async () => {
     try {
       const [hobbyRes, skillRes] = await Promise.all([
-        freelancerApi.getHobby(),
-        freelancerApi.getSkillset()
+        hobbyApi.getHobby(),
+        skillsetApi.getSkillset()
       ]);
 
       setOptions({
@@ -37,7 +39,6 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
 
 
 
-  // Populate form if editing
   useEffect(() => {
     if (freelancer) {
       setFormData({
@@ -58,7 +59,7 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
     }
   }, [freelancer]);
 
-  // Toggle checkbox selection
+
   const toggleSelection = (id, listName) => {
     setFormData(prev => {
       const list = prev[listName];
@@ -71,7 +72,7 @@ const FreelancerForm = ({ freelancer, onSave, onCancel }) => {
     });
   };
 
-  // Submit handler (delegate to parent)
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(null);
