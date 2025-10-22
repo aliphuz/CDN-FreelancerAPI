@@ -9,15 +9,9 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
-api.interceptors.request.use((configs) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    configs.headers.Authorization = `Bearer ${token}`;
-  }
-  return configs;
-});
 
 api.interceptors.response.use(
   (response) => response,
@@ -30,6 +24,10 @@ export const authApi = {
     api.post('/Auth/register', data),
   login: (data) => 
     api.post('/Auth/login', data),
+  logout: () =>
+    api.post('/Auth/logout'),
+  getCurrentUser: () =>
+    api.get('/Auth/me'),
 };
 
 export const freelancerApi = {

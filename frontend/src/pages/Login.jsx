@@ -1,30 +1,45 @@
-import{useState} from 'react';
+import { useState } from 'react';
 import { authApi } from '../services/api';
 import styles from '../styles/Login.module.css';
 import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onLoginSuccess }) => {
-    const [form,setForm] = useState({email:'',password:''});
-    const [error,seterror] = useState(null);
-    const navigate = useNavigate();
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        seterror(null);
-        try {
-            const res = await authApi.login(form);
-            localStorage.setItem('token', res.data.token);
-            localStorage.setItem('role', res.data.role);
-            localStorage.setItem("userId", res.data.userId);
-            onLoginSuccess(res.data.role);
-            navigate('/');
-        }catch(err) {
-            seterror(err.response?.data?.message || 'Login failed');
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
 
-    return (
-        <div className={styles.container}>
+    try {
+      const res = await authApi.login(form); 
+      console.log('Login response:', res.data);
+
+      
+      localStorage.setItem('role', res.data.role);
+      localStorage.setItem('userId', res.data.userId);
+
+      if (onLoginSuccess) onLoginSuccess(res.data.role);
+
+      console.log("Redirecting to dashboard...");
+      navigate('/');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        'Login failed'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={styles.container}>
       <h2 className={styles.title}>Login</h2>
       {error && <p className={styles.error}>{error}</p>}
 
@@ -51,11 +66,13 @@ const Login = ({ onLoginSuccess }) => {
           />
         </div>
 
-        <button type="submit" className={styles.button}>Login</button>
+        <button type="submit" className={styles.button} disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
 
       <a href="/register" className={styles.link}>
-        Don't have an account? Register
+        Don&apos;t have an account? Register
       </a>
     </div>
   );
