@@ -8,29 +8,35 @@ import SkillManagement from './components/SkillManagement';
 import { authApi } from './services/api';
 
 function App() {
-  const [role, setRole] = useState(localStorage.getItem('role') || null);
+  const [role, setRole] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
-  useEffect(() => {
-    const verifyUser = async () => {
-      try {
-        const res = await authApi.getCurrentUser(); 
-        if (res.status === 200) {
-          const data =  res.data;
-          setIsAuthenticated(true);
-          setRole(data.role);
-          localStorage.setItem('role', data.role);
-          localStorage.setItem('userId', data.userId);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch {
+  const verifyUser = async () => {
+    try {
+      const res = await authApi.getCurrentUser(); 
+      if (res.status === 200) {
+        const data = res.data;
+        setIsAuthenticated(true);
+        setRole(data.role);
+        setUserId(data.userId);
+      } else {
         setIsAuthenticated(false);
-      } finally {
-        setAuthChecked(true);
+        setRole(null);
+        setUserId(null);
       }
-    };
+    } catch {
+      setIsAuthenticated(false);
+      setRole(null);
+      setUserId(null);
+    } finally {
+      setAuthChecked(true);
+    }
+  };
+
+  useEffect(() => {
+   
     verifyUser();
   }, []);
 
@@ -39,14 +45,29 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<Login onLoginSuccess={setRole} />} />
+        <Route 
+          path="/login" 
+          element={
+            <Login onLoginSuccess={(loginData) => {
+              
+              setIsAuthenticated(true);
+              setRole(loginData.role);
+              setUserId(loginData.userId);
+            }} />
+          } 
+        />
         <Route path="/register" element={<Register />} />
         
         <Route
           path="/"
           element={
             isAuthenticated ? (
-              <Dashboard setRole={setRole} />
+              <Dashboard 
+                setRole={setRole} 
+                setIsAuthenticated={setIsAuthenticated}
+                role={role}
+                userId={userId}
+              />
             ) : (
               <Navigate to="/login" replace />
             )

@@ -34,13 +34,17 @@ public class AuthController : ControllerBase
             if (res == null)
                 return Unauthorized(new { error = "Invalid" });
 
+            // Just set the cookie - it will overwrite any existing one
             Response.Cookies.Append("token", res.Token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
+                Secure = true, // Required for SameSite=None
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/"
             });
+            
+            Console.WriteLine($"Cookie set for user: {res.userId} with role: {res.Role}");
 
             return Ok(new
             {
@@ -61,7 +65,14 @@ public class AuthController : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout()
     {
-        Response.Cookies.Delete("token");
+        Response.Cookies.Append("token", "", new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = DateTime.UtcNow.AddDays(-1),
+            Path = "/"
+        });
         return Ok(new {message = "Logged out"});
     }
 
@@ -82,7 +93,8 @@ public class AuthController : ControllerBase
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = DateTimeOffset.UtcNow.AddDays(7),
+                Path = "/"
             });
             return Ok(new
             {
@@ -100,6 +112,8 @@ public class AuthController : ControllerBase
     public IActionResult Me()
     {
         var token = Request.Cookies["token"];
+        Console.WriteLine($"Cookie received: {(string.IsNullOrEmpty(token) ? "EMPTY" : "EXISTS")}");
+        
         if (string.IsNullOrEmpty(token))
             return Unauthorized(new { message = "Not authenticated" });
 
@@ -110,6 +124,9 @@ public class AuthController : ControllerBase
 
             var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            
+            // Debug logging
+            Console.WriteLine($"Token claims - UserId: {userId}, Role: {role}");
 
             return Ok(new
             {
@@ -118,8 +135,9 @@ public class AuthController : ControllerBase
                 role
             });
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine($"Token validation error: {ex.Message}");
             return Unauthorized(new { message = "Invalid or expired token" });
         }
     }

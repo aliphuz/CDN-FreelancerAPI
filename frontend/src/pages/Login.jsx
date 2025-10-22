@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { authApi } from '../services/api';
 import styles from '../styles/Login.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,8 @@ const Login = ({ onLoginSuccess }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,11 +21,8 @@ const Login = ({ onLoginSuccess }) => {
       console.log('Login response:', res.data);
 
       
-      localStorage.setItem('role', res.data.role);
-      localStorage.setItem('userId', res.data.userId);
 
-      if (onLoginSuccess) onLoginSuccess(res.data.role);
-
+      if (onLoginSuccess) onLoginSuccess(res.data);
       console.log("Redirecting to dashboard...");
       navigate('/');
     } catch (err) {

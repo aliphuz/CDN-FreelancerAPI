@@ -7,7 +7,7 @@ import FreelancerForm from '../components/FreelancerForm';
 
 
 
-function Dashboard({ setRole }) {
+function Dashboard({ setRole, setIsAuthenticated, role: currentRole, userId: currentUserId }) {
   const [freelancers, setFreelancers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -17,8 +17,8 @@ function Dashboard({ setRole }) {
   const [isSearching, setIsSearching] = useState(false);
   const pageSize = 10;
   const navigate = useNavigate();
-  const role = localStorage.getItem('role');
-  const userId = localStorage.getItem('userId');
+  const role = currentRole;
+  const userId = currentUserId;
   const [hasFreelancer, setHasFreelancer] = useState(false);
 
 
@@ -48,12 +48,15 @@ function Dashboard({ setRole }) {
   const handleLogout = async () => {
   try {
     await authApi.logout(); 
-    localStorage.removeItem('role');
-    localStorage.removeItem('userId');
     setRole(null);
+    setIsAuthenticated(false);
     navigate('/login');
   } catch (err) {
     console.error('Logout failed:', err);
+    
+    setRole(null);
+    setIsAuthenticated(false);
+    navigate('/login');
   }
 };
 
